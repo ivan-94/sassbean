@@ -1,0 +1,50 @@
+////
+/// @group mixins
+/// @see https://css-tricks.com/snippets/sass/bem-mixins/
+////
+
+/// Block Element
+/// @access public
+/// @alias e
+/// @param {String} $element - Element's name
+/// @example
+///   .block {
+///     @include element('element') { /*...*/ }
+///     @include modifier('modifier') {
+///       /*...*/
+///     @include element('element'){/*...*/}
+///    }
+///   }
+///   output=>
+///   .block__element {/*...*/}
+///   .block--modifier {/*...*/}
+///   .block--modifier__element {/*...*/}
+@mixin element($element) {
+  &__#{$element} {
+    @content;
+  }
+}
+
+/// Block Modifier
+/// @access public
+/// @alias m
+/// @param {String} $modifier - Modifier's name
+@mixin modifier($modifier) {
+  &--#{$modifier} {
+    @content;
+  }
+}
+
+/// see {mixin} element
+@mixin e($element) {
+  @include element {
+    @content;
+  }
+}
+
+/// see {mixin} modifier
+@mixin m($modifier){
+  @include modifier{
+    @content;
+  }
+}

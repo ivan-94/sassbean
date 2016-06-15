@@ -1,0 +1,120 @@
+////
+/// @author ivan
+/// @group mixins
+////
+
+
+/// 构建选择器
+/// @access private
+/// @param {String} $selector-append -  用于追加到原始选择器后面的选择器
+/// @param {String} $last-append     -  用于追加在  ～ 后面的元素
+/// @param {Boolean} $sibling        -  是否使用 ～ 选择兄弟元素
+/// @example
+
+@function -build-selector($selector-append, $last-selector, $sibling: true) {
+  $selector: ();
+
+  //遍历选择器，比如ul > li, list item 
+  @each $s in & {
+    $-last-selector: "";
+    $sel1: selector-append($s, $selector-append);
+    @if $sibling {
+      $-last-selector: '~' + if($last-selector, $last-selector, nth($s, -1));
+      $sel2: selector-nest($sel1, $-last-selector);
+      $selector: append($selector, $sel2, comma);
+    } 
+    $selector: append($selector, $sel1, comma);
+  }
+  @return selector-parse($selector);
+}
+
+
+/// 选择指定数量的子元素 
+/// @access public
+/// @param {Number | List} $condition - 条件语句
+/// @param {String} $last-selector [null] - 子元素
+/// @example
+///  
+@mixin quantity($condition, $last-selector: null) {
+  $selector-append: null;
+  $sibling: true;         // add ~ selector
+
+  //exactly
+  @if type-of($condition) == 'number' {
+    @if $condition <= 0 {
+      @error '`#{$condition}` must be a positive number';
+    }
+    $count: $condition;
+    $selector-append: ':nth-last-child(#{$count}):first-child';
+  }
+
+  @else if type-of($condition) == 'list' {
+    @if length($condition) == 2 {
+      $operator: nth($condition, 1);
+      $count:    nth($condition,2);
+      @if not type-of($count) == 'number' and $count  < 0 {
+        @error "#{$count} is not a valid  number";
+      }
+
+      // less than N
+      @if $operator == 'lt' {
+        $selector-append: ':nth-last-child(-n+#{$count - 1 }):first-child';
+      }
+      //less than equal N
+      @else if $operator == 'lte' {
+        $selector-append: ':nth-last-child(-n+#{$count}):first-child';
+      }
+      //great than N
+      @else if $operator == 'gt' {
+        $selector-append: ':nth-last-child(n+#{$count + 1}):first-child';
+      }
+      //great than equal N
+      @else if $operator == 'gte' {
+        $selector-append: ':nth-last-child(n+#{$count}):first-child';
+      }
+      //head N
+      @else if $operator == 'head' {
+        $sibling: false;
+        $selector-append: ':not(:nth-child(n+#{$count + 1}))';
+      }
+      // last N
+      @else if $operator == 'tail' {
+        $sibling: false;
+        $selector-append: ':not(:nth-child(n+#{$count + 1}))';
+      }
+      @else {
+        @error "#{$operator} is not a valid operator";
+      }
+    }
+    //between
+    @else if length($condition) == 3 {
+      $operator: nth($condition,2);
+      $start:    nth($condition,1);
+      $end:      nth($condition,3);
+      
+      @if type-of($start) != 'number' or type-of($end) != 'number' {
+        @error "start and end must be number,such as '12 to 15'";
+      }
+      //exclude end
+      @if $operator == 'to' {
+        $selector-append: ':nth-last-child(n+#{$start}):nth-last-child(-n+#{$end - 1}):first-child';
+      }
+      //include end
+      @else if $operator == 'through' {
+        $selector-append: ':nth-last-child(n+#{$start}):nth-last-child(-n+#{$end}):first-child';
+      }
+      @else {
+        @error "`#{$operator}` is not a valid operator";
+      }
+    } 
+    @else {
+      @error "#{$condition} is not a valid command";
+    }
+  }
+
+  $build-selector: -build-selector($selector-append,$last-selector,$sibling);
+
+  @at-root #{build-selector} {
+    @content;
+  }
+}

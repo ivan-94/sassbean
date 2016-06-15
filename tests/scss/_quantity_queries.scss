@@ -1,0 +1,37 @@
+
+@include test-module("quantity queries") {
+
+  @include test('test -build-selector [function]'){
+    $selector-append: ':first-child';
+    $last-selector:   null;
+    $actual: null;
+
+    $case: ((true
+            '.list .item'
+            '.list .item:first-child ~ .item, .list .item:first-child' 
+            ),
+            (false
+            '.list .item'
+            '.list .item:first-child'
+            ));
+
+    @each $sibling, $context ,$expect in $case {
+      $expect: sel($expect);
+      @include context($context){
+        $actual: -build-selector($selector-append, $last-selector,$sibling);
+        @debug $actual;
+      }
+      @include assert-equal($actual,$expect," ");
+    }
+  }
+
+  @include test("test quantity [Mixin]") {
+    @include assert('test mixins') {
+      @include input{
+      }
+      @include expect{
+      }
+    }
+  }
+};
+

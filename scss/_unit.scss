@@ -1,0 +1,93 @@
+////
+/// @group functions
+/// @link https://github.com/zurb/foundation-sites/blob/develop/scss/util
+///
+
+
+$global-font-size: 100% !default;
+
+/// removes the unit form a value, returning the number only
+/// @access public
+/// @param {Number} $num - Number to strip unit from
+@function strip-unit($num) {
+  @return $num / ($num * 0 + 1);
+}
+
+/// Converts one or more absolute length values into matching rem values
+/// @access public
+/// @param {Number|List} $value - one or more values to convert
+/// @param {Number} $base [null] - the base value to use when calculating the 'rem'
+@function convert-to-rem($value, $base: null) { 
+  $rem-values: ();
+
+  @if $base == null {
+    $base: $global-font-size;
+  }
+
+  // assume that 100% font-size = 16px in most all browser
+  @if unit($base) == '%' {
+    $base: ($base / 100%) * 16px;
+  }
+
+  @if type-of($value) == 'number' {
+    @return -to-rem($value, $base);
+  }
+  @else if type-of($value) == 'list' {
+    @each $v in $value {
+      $rem-values: append($rem-values, -to-rem($v, $base));
+    }
+  }
+  @else {
+    @error "TypeError `$value` must be a list or number";
+  }
+  @return $rem-values;
+}
+
+/// @access private
+@function -to-rem($value, $base: null) {
+  @if not type-of($value) == 'number' {
+    @error inspect($value) + "is not a valid number";
+  }
+
+  @if unit($value) != 'rem' {
+    $value: strip-unit(-to-px($value)) / strip-unit(-to-px($base)) * 1rem;
+  }
+
+  @if $value == 0rem {
+    $value: 0;
+  }
+  @return $value;
+}
+
+/// Convert a unitless, pixel, or rem value to em, the value relative to html font-size, only use for breakpoints
+/// @access private
+@function -to-em($value) {
+  @if is-px-compatible($value) or unitless($value) {
+    $value: convert-to-rem($value, $base: 16px);
+  }
+  @return strip-unit($value) * 1em;
+}
+
+
+/// covert absolute length to px 
+/// @access public
+/// @param {Number} $value - <length> with absolute unit
+/// @return Number with px unit
+@function -to-px($value){
+  @if not type-of($value) == 'number' {
+    @error inspect($value) + "is not a valid number";
+  }
+  @return 0px + $value;
+}
+
+/// return true if given $value is px-compatible
+/// @access public
+@function is-px-compatible($value) {
+  $absolute-units: ('px','cm', 'mm', 'pt', 'pc', 'in');
+  @if not unitless($value) and index($absolute-units,unit($value)){
+    @return true;
+  }
+  @else {
+    @return false;
+  }
+}

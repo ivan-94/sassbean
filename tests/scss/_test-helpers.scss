@@ -1,0 +1,26 @@
+//
+/// get selector like return by &
+/// @param {String} $selector - string of selector like ".list .item"
+/// @return {List} - selector
+/// @example 
+///  sel('.list .item, ul > li') //=> ((".list" ".item"), ("ul" ">" "li"))
+@function sel($selector){
+  @if type-of($selector) == 'string' and str-length($selector) > 0 {
+    @return selector-parse($selector);
+  }
+}
+
+/// create a pure context for '&' operator, it is useful when function and mixin 's nesting is deep
+/// @param {String} $selector - '&' selector
+
+@mixin context($selector:null) {
+  @at-root {
+    @if $selector {
+      #{sel($selector)} {
+        @content;
+      }
+    } @else {
+      @content;
+    }
+  }
+}

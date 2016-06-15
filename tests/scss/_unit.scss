@@ -1,0 +1,43 @@
+@include test-module("unit") {
+  @include test("test strip-unit") {
+    $case: (1px 1, 4rem 4, 5em 5, 6% 6);
+    @each $num, $expect in $case {
+      @include assert-equal(strip-unit($num),$expect,
+      "`#{$num}` should equal #{$expect}");
+    }
+  }
+
+  @include test("test -to-px") {
+    $case: (1pc 16px, 1pt 1.33333px, 1px 1px);
+    @each $value, $expect in $case {
+      @include assert-equal(round(-to-px($value)), round($expect),
+      "`#{$value}` should equal #{$expect}"
+      );
+    }
+  }
+
+  @include test("test convert-to-rem") {
+    $case: (16px 1rem null,20px (20rem/16) null, 12px (12rem/20) 20px);
+    @each $value, $expect,$base in $case {
+      @include assert-equal(convert-to-rem($value, $base),$expect,
+      "`#{$value}` should equal #{$expect}"
+      )
+    }
+  }
+
+  @include test("test is-px-compatible") {
+    $case: (16px true, 16pc true, 17in true, 18em false, 17cm true);
+    @each $value, $expect in $case {
+      @include assert-equal(is-px-compatible($value), $expect);
+    }
+  }
+
+  @include test("test -to-em") {
+    $case: (16px 1em, 200px (200em/16));
+    @each $value ,$expect in $case {
+      @include assert-equal(-to-em($value),$expect,
+      "`#{$value}` should equal #{$expect}"
+      );
+    }
+  }
+}

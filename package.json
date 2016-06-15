@@ -1,0 +1,38 @@
+{
+  "name": "sass-helpers",
+  "version": "0.1.0",
+  "description": "sass helpful mixins and functions",
+  "main": "sass/helpers.scss",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test:sass": "mocha tests/scss/tests.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carney520/sass-helpers.git"
+  },
+  "keywords": [
+    "sass",
+    "sass",
+    "mixin",
+    "quantity",
+    "queries"
+  ],
+  "author": "ivan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/carney520/sass-helpers/issues"
+  },
+  "homepage": "https://github.com/carney520/sass-helpers#readme",
+  "dependencies": {
+    "gulp": "^3.9.1"
+  },
+  "devDependencies": {
+    "gulp-sass": "^2.3.1",
+    "mocha": "^2.5.3",
+    "sass-true": "^2.0.3"
+  }
+}
