@@ -1,0 +1,21 @@
+////
+/// @group Responsive image
+////
+
+
+/// keep images form scaling beyond the width of their parents
+/// @param {String} $display - image `display` property
+@mixin img-fluid($display: block) {
+  display: $display;
+  max-width: 100%;
+  height: auto;
+}
+
+/// retina image for setting background-image and background-size
+@mixin img-retina($img-1x, $img-2x,$width-1x, $height-1x) {
+  background-image: url($img-1x);
+  @include breakpoint(retina) {
+    background-image: url($img-2x);
+    background-size: $width-1x, $height-1x;
+  }
+}

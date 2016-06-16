@@ -1,0 +1,59 @@
+////
+/// @group centering
+////
+
+
+@mixin ghost-center-wrapper{
+  &::before {
+    content: " ";
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+}
+
+@mixin ghost-center-content {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+
+@mixin flex-vertical-center {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+
+/// horizontal centering for normal block element
+@mixin block-horizontal-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/// text horizontal for inline elements
+@mixin text-center {
+  text-align: center;
+}
+
+
+
+/// absolute centering
+@mixin absolute-horizontal-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@mixin absolute-vertical-center {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}

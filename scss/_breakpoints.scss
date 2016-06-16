@@ -1,0 +1,173 @@
+// see https://github.com/zurb/foundation-sites/blob/develop/scss/util/_breakpoint.scss
+////
+/// @group breakpoints
+////
+
+/// A list of named breakpoints. you can use these with the `breakpoint()` mixin to quikly create media queries
+
+$breakpoints: (
+  small: 0,
+  medium: 640px,
+  large: 1024px,
+  xlarge: 1200px,
+  xxlarge: 1440px
+) !default;
+
+$-small: small;
+$breakpoint-classes:  (small medium large) !default;
+
+/// Generates a media query string
+/// mobile first
+/// @access private
+/// @param {Keyword|List|Number} $condition - Breakpoint name or px, rem,em value or condition expression
+/// @example 
+///  breakpoint(160px);     => "(min-width: 16em)"
+///  breakpoint(small);     => ""
+///  breakpoint(landscape); => "(orientation: landscape)"
+///  breakpoint(lt large);  => "(max-width: 64em)"
+///  breakpoint(gt large);  => "(min-width: 64em)"
+///  breakpoint(small to medium) => "(max-width: 40em)";
+///  breakpoint(media to large)  => "(min-width: 40em) and (max-width: 64em)";
+///  ## retina
+///  ```Autoprefixer takes care of adding -webkit-min-device-pixel-ratio and
+///   and -o-min-device-pixel-ratio, but doesn't convert dppx =>  dpi
+///  There's no such thing as unprefixed min-device-pixel-ratio since it's nostandard
+///  192dpi for IE9-11, 2dppx is standardized
+///  ```
+///  breakpoint(retina);    => "(min-resolution: 2ddpx), (min-resolution: 192dpi)"
+@function breakpoint($condition) {
+  @debug inspect($condition);
+  //number
+  @if type-of($condition) == 'number'{
+    $condition: -to-em($condition);
+    @if $condition > 0em {
+      @return "(min-width: #{$condition)})";
+    } @else {
+      @warn "`#{$condition}` is not a valid number";
+    }
+  }
+
+  //keyword
+  @if type-of($condition) == 'string' {
+    @if $condition == "landscape" or $condition == "portrait" {
+      @return "(orientation: #{$condition})";
+    }
+    @if $condition == "retina" {
+      @return "(min-resolution: 2dppx), (min-resolution: 192dpi)"; //or
+    }
+
+    //named breakpoints
+    $val: parse-keyword($condition);
+    @if $val {
+      @if $val > 0em {
+        @return "(min-width: #{$val})";
+      }
+    }
+    @else {
+      @warn "`#{$condition}` is not defined in your $breakpoints setting.";
+    }
+  }
+
+  //condition expression
+  @if type-of($condition) == 'list' {
+    // gt|lt keyword|number
+    @if length($condition) == 2 {
+      $operator: nth($condition,1);
+      $val:      parse-keyword(nth($condition,2));
+
+      @if index(('gt' 'lt'),$operator) and $val {
+        @if $val > 0em {
+          @return "(#{if($operator == 'gt','min','max')}-width: #{$val})"
+        }
+      } @else {
+        @warn "`#{$val}` is not valid number or #{$operator} is not a valid operator.";
+      }
+    }
+
+    // keyword to keyword
+    @else if length($condition) == 3 {
+      $start:    parse-keyword(nth($condition,1));
+      $end:      parse-keyword(nth($condition,3));
+      $operator: nth($condition,2);
+
+      @if ($start or $end) and $operator == 'to' {
+        @if $start and $end{
+          @if $start > $end {
+            //swap
+            $temp: $start;
+            $start: $end;
+            $end:  $temp;
+          }
+        }
+
+        $str: '';
+        @if $start > 0em {
+          $str: $str + '(min-width: #{$start})';
+
+          @if $end != null and $end > 0em {
+            $str: $str + ' and ';
+          }
+        }
+
+        @if $end != null and $end > 0em {
+          $str: $str + '(max-width: #{$end})';
+        }
+        @return $str;
+      } @else {
+        @warn "`#{$start}` or `#{$end}` is not a valid number or #{$operator} is not a valid operator.";
+      }
+    }
+  }
+
+  @return "";
+}
+
+/// @access private
+@function parse-keyword($keyword) {
+  @if type-of($keyword) == 'number' {
+    @return -to-em($keyword);
+  }
+  @else if map-has-key($breakpoints, $keyword) {
+    @return -to-em(map-get($breakpoints, $keyword));
+  } 
+  @else {
+    @return null;
+  }
+}
+
+
+/// Wrap a media query around the content you put inside the mixin
+/// @param {Keyword|List|Number} $value - the same as breakpoint function
+/// @example
+///   @include breakpoint(medium) {/**/} => @media screen and (min-width: 40em){/**/}
+@mixin breakpoint($value) {
+  $str: breakpoint($value);
+
+  @if $str == '' {
+    @content;
+  }
+  @else {
+    @media screen and #{$str} {
+      @content;
+    }
+  }
+}
+
+/// Iteates through breakpoints defined in `$breakpoint-classes` 
+@mixin each-breakpoint($small: true){
+  $map: $breakpoint-classes;
+
+  @if not $small{
+    $map: map-remove($map,$-small);
+  }
+
+  @each $size in $map {
+    $temp: $keyword;         //store global $keyword
+    $keyword: $size !global;
+
+    @include breakpoint($size) {
+      @content;
+    }
+    $keyword: $temp !global; //restore
+  }
+}

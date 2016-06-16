@@ -1,0 +1,34 @@
+////
+/// @group functions
+////
+@import "base/types";
+
+/// Determine if a value is falsey or empty;
+/// @param {Base} $val - Value to check
+/// @return {Boolean}  return true if $val is empty or falsey
+@function is-empty($val) {
+  @if $val == null or $val == none {  //none is a css keyword
+    @return true;
+  }
+  @if type-of($val) == 'number' and strip-unit($val) == 0 {
+    @return true;
+  }
+
+  @if (type-of($val) == 'list' or type-of($val) == 'map') and length($val) == 0 {
+    @return true;
+  }
+
+  @return false;
+}
+
+
+
+/// Finds a value in nested map
+/// @param {Map} $map - Map to pull a value from
+/// @param {String} $keys... - keys to use when looking for a value
+@function map-deep-get($map,$keys...) {
+  @each $key in $keys {
+    $map: map-get($map, $key);
+  }
+  @return $map;
+}

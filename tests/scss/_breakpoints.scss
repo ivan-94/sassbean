@@ -1,0 +1,95 @@
+@include test-module('breakpoints') {
+  @include test("call with number") {
+    $value: 50px;
+    $expect: '(min-width: #{-to-em($value)})';
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect);
+  }
+
+  @include test("invalid number") {
+    $value: -50px;
+    $expect: '';
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect);
+  }
+
+  @include test("landscape") {
+    $value: 'landscape';
+    $expect: '(orientation: #{$value})';
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect);
+  }
+
+  @include test("invalid keyword") {
+    $value: 'invalid';
+    $expect: '';
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect);
+  }
+
+  @include test("retina") {
+    $value: 'retina';
+    $expect: '(min-resolution: 2dppx), (min-resolution: 192dpi)';
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect);
+  }
+
+  @include test("small") {
+    $value: 'small';
+    $expect: '';
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect);
+  }
+
+  @include test("great than") {
+    $value: (gt large);
+    $expect: "(min-width: #{parse-keyword(large)})";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "gt larger");
+
+    $value: (gt small);
+    $expect: "";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "gt small");
+
+    $value: (lt large);
+    $expect: "(max-width: #{parse-keyword(large)})";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "lt large");
+
+    $value: (lt 1024px);
+    $expect: "(max-width: #{parse-keyword(1024px)})";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "lt 1024px");
+  }
+
+  @include test("keyword|number to keyword|number") {
+    $value: (10em to 40em);
+    $expect: "(min-width: 10em) and (max-width: 40em)";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "10em to 40em");
+
+    $value: (0em to 40em);
+    $expect: "(max-width: 40em)";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "0 to 40em");
+
+    $value: (small to large);
+    $expect: "(max-width: #{parse-keyword(large)})";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "small to large");
+
+    $value: (large to small);
+    $expect: "(max-width: #{parse-keyword(large)})";
+    $actual: breakpoint($value);
+    @include assert-equal($actual,$expect,
+     "large to small");
+  }
+}

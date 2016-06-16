@@ -1,0 +1,15 @@
+@include test-module("base") {
+  @include test("test is-empty()") {
+    $case: (0 true,
+            none true,
+            1 false,
+            () true,
+            (1px) false,
+            ("test": 1px) false,
+            );
+    @each $value, $expect in $case {
+      $actual: is-empty($value);
+      @include assert-equal($actual,$expect);
+    }
+  }
+}

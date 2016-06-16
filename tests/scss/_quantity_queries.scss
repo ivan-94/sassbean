@@ -19,7 +19,6 @@
       $expect: sel($expect);
       @include context($context){
         $actual: -build-selector($selector-append, $last-selector,$sibling);
-        @debug $actual;
       }
       @include assert-equal($actual,$expect," ");
     }

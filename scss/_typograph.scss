@@ -1,0 +1,48 @@
+////
+/// @group typograph
+////
+
+/// text truncate
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/// css image repalcement
+@mixin test-hide {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+
+@mixin text-emphasis-variant($parent, $color) {
+  #{$parent} {
+    color: $color;
+  }
+  a#{$parent} {
+    @include hover-focus {
+      color: darken($color,10%);
+    }
+  }
+}
+
+@mixin bg-variant($parent, $color){
+  #{$parent} {
+    background-color: $color;
+  }
+  a#{$parent} {
+    @include hover-focus {
+      background-color: darken($color,10%);
+    }
+  }
+}
+
+/// unstyled keeps list items block level, just removes default browser padding and list style
+@mixin list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
