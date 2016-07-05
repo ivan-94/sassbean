@@ -1,0 +1,98 @@
+// 生成网格类
+
+
+////
+/// @group grid
+/// @access public
+////
+
+///BEM 风格
+@mixin g-generate-classes (
+  //命名
+  $row: 'row',
+  $col: 'col',
+  $collapse: 'collapse',
+  $uncollapse: 'uncollapse',
+  $offset: 'offset',
+  $push: 'push',
+  $pull: 'pull',
+  $center: 'centered',
+  $uncenter: 'uncentered',
+  $separator: '--'
+) {
+  //row
+  .#{$row} {
+    @include g-row;
+
+    //nested row
+    & & {
+      @include g-row($options: (nest unclearfix));
+      &.#{$row + $separator + $collapse} {
+        margin: {
+          left: 0;
+          right: 0;
+        }
+      }
+    }
+  }
+  //collapse row
+  .#{$row + $separator + $collapse} {
+    > .#{$col} {
+      @include g-col-collapse;
+    }
+  }
+
+  // column
+  .#{$col} {
+    @include g-col;  //默认百分百大小
+  }
+
+  //responsive column
+  @include  each-breakpoint {
+    @for $i from 1 through $grid-count {
+      // col width
+      .#{$col + $separator}#{$keyword}-#{$i} {
+        width: cal-col-width($i);
+      }
+      // col position
+      @if $i < $grid-count {
+        .#{$col + $separator}#{$keyword}-#{$push}-#{$i} {
+          @include g-col-position($i)
+        }
+        .#{$col + $separator}#{$keyword}-#{$pull}-#{$i} {
+          @include g-col-position(-$i)
+        }
+      }
+      //offset
+      .#{$col+ $separator}#{$keyword}-#{$offset}-#{$i - 1} {
+        @include g-col-offset($i - 1);
+      }
+    }
+
+    //col position centering
+    .#{$col + $separator}#{$keyword}-#{$center} {
+      @include g-col-position(center);
+    }
+    .#{$col + $separator}#{$keyword}-#{$uncenter},
+    .#{$col + $separator}#{$keyword}-#{$push}-0,
+    .#{$col + $separator}#{$keyword}-#{$pull}-0 {
+      @include g-col-unposition;
+    }
+
+    // row collaspse
+    .#{$row + $separator}#{$keyword}-#{$collapse} {
+      > .#{$col} {
+        @include g-col-collapse;
+      }
+    }
+    .#{$row + $separator}#{$keyword}-#{$uncollapse} {
+      > .#{$col} {
+        $gutter: if(is-map($grid-gutter), get-breakpoint-val($grid-gutter, $keyword), $gutter);
+        @if $gutter != null {
+          @include g-col-uncollapse($gutter);
+        }
+      }
+    }
+
+  }
+}

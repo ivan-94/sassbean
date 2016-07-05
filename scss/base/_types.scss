@@ -45,3 +45,11 @@ $-absolute-length: ('cm' 'mm' 'in' 'px' 'pt' 'pc');
 @function is-resolution($value) {
   @return is-number($value) and index('dpi' 'dpcm' 'dppx', $value) != null;
 }
+
+@function is-map($value) {
+  @return type-of($value) == 'map';
+}
+
+@function is-list($value) {
+  @return type-of($value) == 'list';
+}

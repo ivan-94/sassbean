@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test:sass": "mocha tests/scss/tests.js"
+    "test": "mocha tests/scss/tests.js"
   },
   "repository": {
     "type": "git",
@@ -26,11 +26,11 @@
     "url": "https://github.com/carney520/sass-helpers/issues"
   },
   "homepage": "https://github.com/carney520/sass-helpers#readme",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-sass": "^2.3.1",
+    "gulp-sourcemaps": "^1.6.0",
     "mocha": "^2.5.3",
     "sass-true": "^2.0.3",
     "sassdoc": "^2.1.20"

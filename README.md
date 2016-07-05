@@ -19,3 +19,7 @@ npm i sass-helpers
   })
 ```
 
+## Test
+```
+  npm test
+```

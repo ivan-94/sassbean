@@ -1,0 +1,34 @@
+////
+/// @group grid
+/// @access public
+////
+
+/// 折叠列，即没有间隔
+@mixin g-col-collapse {
+  padding: {
+    left: 0;
+    right: 0;
+  }
+}
+
+/// 设置列的间隔
+@mixin g-col-uncollapse($gutter: $grid-gutter) {
+  @if is-map($gutter) {
+    //响应式的gutter
+    @each $breakpoint, $value in $gutter {
+      $padding: convert-to-rem($value) / 2;    //转换为rem
+      @include breakpoint($breakpoint) {
+        padding: {
+          left: $padding;
+          right: $padding;
+        }
+      }
+    }
+  } @else {
+    $padding: convert-to-rem($gutter) / 2;
+    padding: {
+      left: $padding;
+      right: $padding;
+    }
+  }
+}

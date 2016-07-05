@@ -20,7 +20,7 @@ $breakpoint-classes:  (small medium large) !default;
 /// mobile first
 /// @access private
 /// @param {Keyword|List|Number} $condition - Breakpoint name or px, rem,em value or condition expression
-/// @example 
+/// @example
 ///  breakpoint(160px);     => "(min-width: 16em)"
 ///  breakpoint(small);     => ""
 ///  breakpoint(landscape); => "(orientation: landscape)"
@@ -36,7 +36,6 @@ $breakpoint-classes:  (small medium large) !default;
 ///  ```
 ///  breakpoint(retina);    => "(min-resolution: 2ddpx), (min-resolution: 192dpi)"
 @function breakpoint($condition) {
-  @debug inspect($condition);
   //number
   @if type-of($condition) == 'number'{
     $condition: -to-em($condition);
@@ -129,7 +128,7 @@ $breakpoint-classes:  (small medium large) !default;
   }
   @else if map-has-key($breakpoints, $keyword) {
     @return -to-em(map-get($breakpoints, $keyword));
-  } 
+  }
   @else {
     @return null;
   }
@@ -153,7 +152,7 @@ $breakpoint-classes:  (small medium large) !default;
   }
 }
 
-/// Iteates through breakpoints defined in `$breakpoint-classes` 
+/// Iteates through breakpoints defined in `$breakpoint-classes`
 @mixin each-breakpoint($small: true){
   $map: $breakpoint-classes;
 
@@ -162,12 +161,37 @@ $breakpoint-classes:  (small medium large) !default;
   }
 
   @each $size in $map {
-    $temp: $keyword;         //store global $keyword
+    $temp: if(global-variable-exists(keyword), $keyword, null);         //store global $keyword
     $keyword: $size !global;
 
     @include breakpoint($size) {
       @content;
     }
     $keyword: $temp !global; //restore
+  }
+}
+
+/// 用于响应式列表获取值，
+/// @example
+///   如 $map: (small: 10px, medium: 20px);
+///   get-breakpoint-val($map, small) => 10px
+///   get-breakpoint-val($map, medium) => 20px
+///   get-breakpoint-val($map, large) => 20px
+@function get-breakpoint-val($map, $value) {
+  @if not map-has-key($breakpoints, $value) {  //关键字不存在
+    @return null;
+  }
+  @else if map-has-key($map, $value) {
+    @return map-get($map, $value);
+  }
+  @else {
+    $anchor: null;
+
+    @each $key, $_ in $breakpoints {     //map 的遍历与创建时的一致
+      @if map-has-key($map, $key) {
+        $anchor: $key;
+      }
+    }
+    @return map-get($map, $anchor);
   }
 }

@@ -92,4 +92,13 @@
     @include assert-equal($actual,$expect,
      "large to small");
   }
+
+  @include test("test get-breakpoint-val") {
+    $map: (small: 16px, medium: 20px);
+    $input: (small 16px, medium 20px, xlarge 20px, xxlarge 20px);
+
+    @each $value, $expect in $input {
+      @include  assert-equal(get-breakpoint-val($map, $value), $expect);
+    }
+  }
 }

@@ -45,7 +45,7 @@
 
 /// see {mixin} modifier
 @mixin m($modifier){
-  @include modifier{
+  @include modifier {
     @content;
   }
 }

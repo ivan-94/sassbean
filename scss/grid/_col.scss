@@ -1,0 +1,55 @@
+////
+/// @group grid
+/// @access public
+////
+
+/// 计算列的宽度
+/// @access private
+/// @param {Number} value
+/// @example
+///   cal-col-width(78%)  => 78%
+///   cal-col-width(12)  => percentage(12/grid-count)
+///   cal-col-width(3 of 5)  => percentage(3/5)
+@function cal-col-width($value) {
+  $width: 0%;
+
+  @if is-number($value) {
+    @if unit($value) == '%' {
+      $width: $value;
+    } @else if $value < 1 and $value > 0 {
+      $width: percentage($value);
+    } @else {
+      $width: percentage($value / $grid-count);
+    }
+  } @else if is-list($value) and length($value) == 3 {
+    $width: percentage(nth($value, 1) / nth($value, 3));
+  } @else {
+    @warn "Wrong syntax for cal-col-width(). use a number, decimal, percentage, or <number> of <number>";
+  }
+  @return $width;
+}
+
+/// 定义一行
+@mixin g-col(
+  $size: $grid-count,
+  $gutter: $grid-gutter
+) {
+  position: relative;
+  min-height: 1px;
+  // 处理gutter
+  @include g-col-uncollapse($gutter);
+
+  $width: cal-col-width($size);
+  @if $enable-flex {
+    flex: 0 0 $width;
+    max-width: $width;
+  } @else {
+    float: left;
+    width: $width;
+  }
+}
+
+
+/// 合并行和列(combinded column row)
+@mixin g-col-row() {
+}

@@ -1,0 +1,42 @@
+////
+/// @group grid
+/// @access public
+////
+
+
+/// 列偏移
+/// @param {Number|List} $size - 偏移值，可以是百分百、小数值、n of n 格式, 整数
+@mixin g-col-offset($size) {
+  margin-left: cal-col-width($size);
+}
+
+/// 列定位
+/// @param {Number|List|Keyword} $pos
+/// @example
+///   g-col-position(-30%);  => 向左偏移30%
+///   g-col-position(30%);  => 向右偏移30%
+@mixin g-col-position($pos) {
+  //关键字居中
+  @if $pos == 'center' {
+    & {
+      float: none;  //禁止浮动, 这样每一列都会独占一行
+    }
+    margin:{
+      left: auto;
+      right: auto;
+    }
+  } @else {
+    $offset: cal-col-width($pos);
+    left: $offset;
+  }
+}
+
+/// 取消列定位
+@mixin g-col-unposition {
+  position: static;
+  margin: {
+    left: 0;
+    right: 0;
+  }
+  float: left;
+}
