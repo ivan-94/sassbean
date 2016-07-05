@@ -1,3 +1,8 @@
+////
+/// @group util
+/// @access public
+////
+
 @mixin clearfix {
   &::before,
   &::after {
@@ -14,4 +19,12 @@
   outline: 0;
 }
 
-
+/// generate classes
+@mixin generate-util-classes {
+  .clearfix {
+    @include clearfix;
+  }
+  .disable-mouse-outline {
+    @include disable-mouse-outline;
+  }
+}

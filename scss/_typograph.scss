@@ -46,3 +46,18 @@
   padding-left: 0;
   list-style: none;
 }
+
+
+/// generate classes
+@mixin generate-type-classes {
+  .list-unstyled {
+    @include list-unstyled;
+  }
+  .text-hide {
+    @include text-hide;
+  }
+
+  .ellipsis {
+    @include ellipsis;
+  }
+}

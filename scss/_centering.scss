@@ -57,3 +57,17 @@
   left: 50%;
   transform: translate(-50%,-50%);
 }
+
+
+/// generate classes
+@mixin generate-centering-classes {
+  .text-center {
+    @include text-center;
+  }
+  .absolute-center {
+    @include absolute-center;
+  }
+  .flex-vertical-center {
+    @include flex-vertical-center;
+  }
+}
