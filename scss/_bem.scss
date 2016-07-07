@@ -21,6 +21,7 @@
 ///   .block--modifier {/*...*/}
 ///   .block--modifier__element {/*...*/}
 @mixin element($element) {
+  $-parent: & !global;  // store parent from shadow
   &__#{$element} {
     @content;
   }
@@ -32,6 +33,24 @@
 /// @param {String} $modifier - Modifier's name
 @mixin modifier($modifier) {
   &--#{$modifier} {
+    @content;
+  }
+}
+
+/// inherit parent status, only use inner element
+/// @example 
+///  .b { 
+///     @include element(a) {
+///       @include shadow(c) {     //=> .b.c .b__a
+///         color: red;
+///       }
+///     }
+///   }
+@mixin shadow($parent, $addPrefix: true, $prefix: '.') {
+  @if $addPrefix and not index('.' '#', str-slice($parent, 1, 1)) {
+    $status: $prefix + $parent;
+  }
+  @at-root #{$-parent}#{$parent} #{&} {
     @content;
   }
 }

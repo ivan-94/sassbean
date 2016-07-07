@@ -1,6 +1,6 @@
 {
   "name": "sass-helpers",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "sass helpful mixins and functions",
   "main": "scss/helpers.scss",
   "directories": {
