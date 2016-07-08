@@ -59,11 +59,32 @@ $combined-modifier: false !default;   //'.block .--modifier'
 ///       }
 ///     }
 ///   }
+$no-parse-prefixs: ('.' '#' ':' '::' '*');
+@function prefixer($value, $addPrefix: true, $prefix: '.') {
+  @if $addPrefix and not index($no-parse-prefixs, str-slice($value, 1, 1)) {
+    @return $prefix + $value;
+  } 
+  @return $value;
+}
+
 @mixin shadow($parent, $addPrefix: true, $prefix: '.') {
-  @if $addPrefix and not index('.' '#', str-slice($parent, 1, 1)) {
-    $parent: $prefix + $parent;
+  $selector: null;
+
+  @if is-list($parent) {
+    $selectors: ();
+    @each $value in $parent {
+      $value: prefixer($value, $addPrefix, $prefix);
+      $value: selector-append($-parent, $value);
+      $selectors: append($selectors, selector-nest($value, &),comma);
+    }
+    $selector: selector-parse($selectors);
+  } 
+  @else {
+    $value: prefixer($parent, $addPrefix, $prefix);
+    $selector: selector-nest(selector-append($-parent, $value), &);
   }
-  @at-root #{$-parent}#{$parent} #{&} {
+
+  @at-root #{$selector} {
     @content;
   }
 }

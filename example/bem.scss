@@ -21,6 +21,16 @@
     @include shadow(h) {    //.a.h .a__d
       color: white;
     }
+    //mutlti shadow
+    //.a.disable .a__d, .a.large .a__d, .a.primary .a__d
+    @include shadow(disable large primary) { 
+      color: red;
+    }
+
+    //.a:hover .a__d, .a:active .a__d, .a:focus .a__d
+    @include shadow(':hover' ':active' ':focus') {  // don't use comma
+      color: blue;
+    }
   }
 }
 
