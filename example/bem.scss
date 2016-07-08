@@ -1,0 +1,25 @@
+@import "../scss/helpers";
+
+.a {
+  @include element(b) {         //.a__b
+    @include shadow(c) {        //.a.c .a__b
+      color: red;
+    }
+  }
+
+  @include element(d) {       //.a__d
+    @include shadow(e) {      //.a.e .a__d
+      color: blue;
+    }
+
+    @include element(f) {    //.a__d__f  //don't nest more than one level
+      color: green;
+      @include shadow(g) {   //.a__d.g .a__d__f
+        color: yellow;
+      }
+    }
+    @include shadow(h) {    //.a.h .a__d
+      color: white;
+    }
+  }
+}
