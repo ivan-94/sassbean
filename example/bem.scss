@@ -23,3 +23,16 @@
     }
   }
 }
+
+
+// modifier
+
+.a {
+  @include modifier('large') {  // .a--large
+    color: red;
+  }
+  $combined-modifier: true !global;
+  @include modifier('small') { // .a.--small
+    color: blue;
+  }
+}

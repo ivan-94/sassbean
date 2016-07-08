@@ -4,6 +4,10 @@
 /// @see https://css-tricks.com/snippets/sass/bem-mixins/
 ////
 
+$element-separator: '__' !default;
+$modifier-separator: '--' !default;
+$combined-modifier: false !default;   //'.block .--modifier'
+
 /// Block Element
 /// @access public
 /// @alias e
@@ -23,7 +27,7 @@
 @mixin element($element) {
   $old: if(global-variable-exists(-parent), $-parent, null);
   $-parent: & !global;  // store parent from shadow
-  &__#{$element} {
+  &#{$element-separator}#{$element} {
     @content;
   }
   $-parent: $old !global;       //restore
@@ -34,7 +38,14 @@
 /// @alias m
 /// @param {String} $modifier - Modifier's name
 @mixin modifier($modifier) {
-  &--#{$modifier} {
+  $selector: null;
+  @if $combined-modifier {
+    $selector: selector-append(&, '.#{$modifier-separator}#{$modifier}');
+  } @else {
+    $selector: selector-append(&, $modifier-separator,$modifier);
+  }
+
+  @at-root #{$selector} {
     @content;
   }
 }
