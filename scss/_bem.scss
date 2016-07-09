@@ -77,33 +77,7 @@ $-nested-modifiers: ();
   $-current-level: $-prev-level !global;
 }
 
-/// build elements class name
-/// @access private
-/// @param {String} $block - block name
-/// @param {List}  $elements - elements
-@function -build-element-class($block, $elements) {
-  $selectors: ();
-  @each $ele in $elements {
-    $selector: bem-element($block, $ele);
-    @if $-scope != null {
-      $selector: selector-nest($-scope, $selector);
-    }
-    $selectors: append($selectors, $selector, comma);
-  }
-  @return selector-parse($selectors);
-}
 
-/// get first elements in element-desc
-/// @access private
-@function -get-element($element-desc) {
-  @return nth(map-get($element-desc, elements), 1);
-}
-
-/// test if current element context is `element group`
-/// @access private
-@function -is-element-group($element-desc) {
-  @return map-get($element-desc, is-group);
-}
 
 /// Block Element
 /// @access public
@@ -147,48 +121,6 @@ $-nested-modifiers: ();
   $-current-level: $-prev-level !global;  //restore level
 }
 
-/// @access private
-@function -get-modified-object($current-level, $block, $element-desc) {
-  $modified-object: null;
-  // block modifiers
-  @if $current-level == block {
-    $modified-object: bem-block($block);
-  }
-  // element modifiers and not inner element group context
-  @else if $current-level == element and not -is-element-group($element-desc) {
-    $element: -get-element($element-desc);
-    $modified-object: bem-element($block, $element);
-  }
-  // invalid modified object
-  @else {
-    @error 'Modifier error: modifier should not called within `element group(#{inspect(map-get($element-desc, elements))}`.';
-  }
-  @return $modified-object;
-}
-
-@function -build-modifier-group-class($modifiers) {
-  $modified-object: -get-modified-object($-current-level, $-block, $-element);
-
-  $selectors: ();
-  @each $modifier in $modifiers {
-    $selector: bem-block($modified-object, $modifier);
-    @if $-scope != null {
-      $selector: selector-nest($-scope, $selector);
-    }
-    $selectors: append($selectors, $selector, comma);
-  }
-  @return selector-parse($selectors);
-}
-
-@function -build-nested-modifiers-class() {
-  $modifiers: $-nested-modifiers;
-  $modified-object: -get-modified-object($-current-level, $-block, $-element);
-  $selector: bem-block($modified-object, $modifiers...);
-  @return if($-scope != null,
-    selector-nest($-scope, $selector),
-    $selector
-    );
-}
 
 /// Block Modifier
 /// @access public
@@ -220,22 +152,6 @@ $-nested-modifiers: ();
   $-nested-modifiers: $old-nested-modifiers !global;
 }
 
-/// @access private
-@function -build-shadow-class($block, $element, $value) {
-  // as modifier
-  @if prefixless($value) {
-    $value: selector-nest(bem-block($block, $value), $element);
-  }
-  // as append
-  @else {
-    $value: selector-nest(selector-append($block, $value), $element);
-  }
-  // context
-  @if $-scope {
-    $value: selector-nest($-scope, $value);
-  }
-  @return $value;
-}
 
 /// inherit parent status, only use inner element
 /// @example
@@ -302,33 +218,6 @@ $-nested-modifiers: ();
 }
 
 
-$no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
-@function prefixless($value) {
-  @if not is-string($value) {
-    @return false;
-  }
-  $i: 1;
-  $l: str-length($value) / 2;
-  @while $i <= $l {
-    $c: str-slice($value, $i, $i);
-    $i: $i + 1;
-    @if $c != ' ' {
-      @if index($no-parse-prefixs, $c) != null {
-        @return false;
-      } @else {
-        @return true;
-      }
-    }
-  }
-  @return true;
-}
-
-@function prefixer($value, $addPrefix: true, $prefix: '.') {
-  @if $addPrefix and prefixless($value) {
-    @return $prefix + $value;
-  }
-  @return $value;
-}
 
 /// generate element class name
 /// @access public
@@ -364,4 +253,121 @@ $no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     $selector: $block;
   }
   @return $selector;
+}
+
+
+$-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
+@function prefixless($value) {
+  @if not is-string($value) {
+    @return false;
+  }
+  $i: 1;
+  $l: str-length($value) / 2;
+  @while $i <= $l {
+    $c: str-slice($value, $i, $i);
+    $i: $i + 1;
+    @if $c != ' ' {
+      @if index($-no-parse-prefixs, $c) != null {
+        @return false;
+      } @else {
+        @return true;
+      }
+    }
+  }
+  @return true;
+}
+
+@function prefixer($value, $addPrefix: true, $prefix: '.') {
+  @if $addPrefix and prefixless($value) {
+    @return $prefix + $value;
+  }
+  @return $value;
+}
+
+/// build elements class name
+/// @access private
+/// @param {String} $block - block name
+/// @param {List}  $elements - elements
+@function -build-element-class($block, $elements) {
+  $selectors: ();
+  @each $ele in $elements {
+    $selector: bem-element($block, $ele);
+    @if $-scope != null {
+      $selector: selector-nest($-scope, $selector);
+    }
+    $selectors: append($selectors, $selector, comma);
+  }
+  @return selector-parse($selectors);
+}
+
+/// get first elements in element-desc
+/// @access private
+@function -get-element($element-desc) {
+  @return nth(map-get($element-desc, elements), 1);
+}
+
+/// test if current element context is `element group`
+/// @access private
+@function -is-element-group($element-desc) {
+  @return map-get($element-desc, is-group);
+}
+
+/// @access private
+@function -get-modified-object($current-level, $block, $element-desc) {
+  $modified-object: null;
+  // block modifiers
+  @if $current-level == block {
+    $modified-object: bem-block($block);
+  }
+  // element modifiers and not inner element group context
+  @else if $current-level == element and not -is-element-group($element-desc) {
+    $element: -get-element($element-desc);
+    $modified-object: bem-element($block, $element);
+  }
+  // invalid modified object
+  @else {
+    @error 'Modifier error: modifier should not called within `element group(#{inspect(map-get($element-desc, elements))}`.';
+  }
+  @return $modified-object;
+}
+
+@function -build-modifier-group-class($modifiers) {
+  $modified-object: -get-modified-object($-current-level, $-block, $-element);
+
+  $selectors: ();
+  @each $modifier in $modifiers {
+    $selector: bem-block($modified-object, $modifier);
+    @if $-scope != null {
+      $selector: selector-nest($-scope, $selector);
+    }
+    $selectors: append($selectors, $selector, comma);
+  }
+  @return selector-parse($selectors);
+}
+
+@function -build-nested-modifiers-class() {
+  $modifiers: $-nested-modifiers;
+  $modified-object: -get-modified-object($-current-level, $-block, $-element);
+  $selector: bem-block($modified-object, $modifiers...);
+  @return if($-scope != null,
+    selector-nest($-scope, $selector),
+    $selector
+    );
+}
+
+/// @access private
+@function -build-shadow-class($block, $element, $value) {
+  // as modifier
+  @if prefixless($value) {
+    $value: selector-nest(bem-block($block, $value), $element);
+  }
+  // as append
+  @else {
+    $value: selector-nest(selector-append($block, $value), $element);
+  }
+  // context
+  @if $-scope {
+    $value: selector-nest($-scope, $value);
+  }
+  @return $value;
 }
