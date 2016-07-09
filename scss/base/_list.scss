@@ -1,0 +1,21 @@
+//  List extensions
+////
+/// @access public
+/// @group api
+////
+
+@function list-join($list, $separator) {
+  $rt: nth($list, 1);
+  $i: 2;
+  $l: length($list);
+  @while $l >= $i {
+    $item: nth($list, $i);
+    @if is-string($item) {
+      $rt: $rt + $separator + $item;
+    } @else {
+      @warn "item: #{$item} not a string";
+    }
+    $i: $i + 1;
+  }
+  @return $rt;
+}

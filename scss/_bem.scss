@@ -1,19 +1,116 @@
 ////
-/// @group mixins
-/// @author Hugo Giraudel
-/// @see https://css-tricks.com/snippets/sass/bem-mixins/
+/// @group bem
+/// @author Ivan lee
 ////
 
+//TODO
+//debug
+//theme
+//namespace
+//at
+
+
+/// define element separator
+/// @type {String}
 $element-separator: '__' !default;
+
+/// define modifier separator
+/// @type {String}
 $modifier-separator: '--' !default;
-$combined-modifier: false !default;   //'.block .--modifier'
+
+/// modifier style like '.block .--modifier',
+/// the prefix of modifier depend on $modifier-separator
+/// @type {Boolean}
+$combined-style-modifier: false !default;
+
+
+// name convention: `-` prefix to indicate private function or variables
+// private global shared varibles
+
+/// @access private
+/// indicate current block context
+/// @type {String}
+$-block: null;    //store current block
+
+/// indicate current element context
+/// @access private
+/// @type {Map}
+///   {
+///     elements: {List},     //current element or element group, use -get-element() to get first element
+///     is-group: {Boolean},  //indicate the $-element is `element group`
+///   }
+$-element: null;  //store current element
+
+/// indicate current scope
+/// @access private
+/// @type {selector}
+$-scope: null;   //store current &
+
+/// indicate current level
+$-current-level: null;
+$-nested-modifiers: ();
+
+/// define a Block
+/// @access public
+/// @alias b
+/// @param {String} $block - Block's name
+@mixin block($block) {
+  $-prev-level: $-current-level;
+  $-current-level: block !global;
+
+  @if $-block != null {
+    @warn 'Block nested Error: It should not be called within another block(`#{inspect($-block)}`)';
+  }
+  // set current scope
+  $-scope: & !global;
+  // set current block
+  $-block: $block !global;
+
+  #{prefixer($block)} {
+    @content;
+  }
+
+  //reset
+  $-block: null !global;
+  $-scope: null !global;
+  //restore
+  $-current-level: $-prev-level !global;
+}
+
+/// build elements class name
+/// @access private
+/// @param {String} $block - block name
+/// @param {List}  $elements - elements
+@function -build-element-class($block, $elements) {
+  $selectors: ();
+  @each $ele in $elements {
+    $selector: bem-element($block, $ele);
+    @if $-scope != null {
+      $selector: selector-nest($-scope, $selector);
+    }
+    $selectors: append($selectors, $selector, comma);
+  }
+  @return selector-parse($selectors);
+}
+
+/// get first elements in element-desc
+/// @access private
+@function -get-element($element-desc) {
+  @return nth(map-get($element-desc, elements), 1);
+}
+
+/// test if current element context is `element group`
+/// @access private
+@function -is-element-group($element-desc) {
+  @return map-get($element-desc, is-group);
+}
 
 /// Block Element
 /// @access public
 /// @alias e
-/// @param {String} $element - Element's name
+/// @param {List} $elements - one or more elements
 /// @example
-///   .block {
+///   @include block(block) {
 ///     @include element('element') { /*...*/ }
 ///     @include modifier('modifier') {
 ///       /*...*/
@@ -24,64 +121,159 @@ $combined-modifier: false !default;   //'.block .--modifier'
 ///   .block__element {/*...*/}
 ///   .block--modifier {/*...*/}
 ///   .block--modifier__element {/*...*/}
-@mixin element($element) {
-  $old: if(global-variable-exists(-parent), $-parent, null);
-  $-parent: & !global;  // store parent from shadow
-  &#{$element-separator}#{$element} {
+@mixin element($elements...) {
+  $-prev-level: $-current-level;
+  $-current-level: element !global;
+
+  @if $-block == null {
+    @error 'Block not found: `#{inspect($elements)}` element should be called within block )! ';
+  }
+
+  @if $-element != null {
+    @error 'Element nested: element(#{inspect($elements)}) should not be called with another element(`#{inspect($-element)}`)!';
+  }
+
+  //save element context
+  $-element: (
+    elements: $elements,
+    is-group: length($elements) > 1
+    ) !global;
+
+  @at-root #{-build-element-class($-block, $elements)} {
     @content;
   }
-  $-parent: $old !global;       //restore
+
+  $-element: null !global;                //reset
+  $-current-level: $-prev-level !global;  //restore level
+}
+
+/// @access private
+@function -get-modified-object($current-level, $block, $element-desc) {
+  $modified-object: null;
+  // block modifiers
+  @if $current-level == block {
+    $modified-object: bem-block($block);
+  }
+  // element modifiers and not inner element group context
+  @else if $current-level == element and not -is-element-group($element-desc) {
+    $element: -get-element($element-desc);
+    $modified-object: bem-element($block, $element);
+  }
+  // invalid modified object
+  @else {
+    @error 'Modifier error: modifier should not called within `element group(#{inspect(map-get($element-desc, elements))}`.';
+  }
+  @return $modified-object;
+}
+
+@function -build-modifier-group-class($modifiers) {
+  $modified-object: -get-modified-object($-current-level, $-block, $-element);
+
+  $selectors: ();
+  @each $modifier in $modifiers {
+    $selector: bem-block($modified-object, $modifier);
+    @if $-scope != null {
+      $selector: selector-nest($-scope, $selector);
+    }
+    $selectors: append($selectors, $selector, comma);
+  }
+  @return selector-parse($selectors);
+}
+
+@function -build-nested-modifiers-class() {
+  $modifiers: $-nested-modifiers;
+  $modified-object: -get-modified-object($-current-level, $-block, $-element);
+  $selector: bem-block($modified-object, $modifiers...);
+  @return if($-scope != null,
+    selector-nest($-scope, $selector),
+    $selector
+    );
 }
 
 /// Block Modifier
 /// @access public
 /// @alias m
-/// @param {String} $modifier - Modifier's name
-@mixin modifier($modifier) {
+/// @alias state
+/// @param {String} $modifier... - one or more modifier
+@mixin modifier($modifiers...) {
   $selector: null;
-  @if $combined-modifier {
-    $selector: selector-append(&, '.#{$modifier-separator}#{$modifier}');
-  } @else {
-    $selector: selector-append(&, $modifier-separator,$modifier);
+  $old-nested-modifiers: $-nested-modifiers;
+
+  @if $-current-level != block and $-current-level != element {
+    @error 'Modifier error: modifier should be called within block or element: (#{inspect($modifiers)})';
+  }
+  // modifiers group. nonsupport nested-modifiers
+  @if length($modifiers) > 1 {
+    $selector: -build-modifier-group-class($modifiers);
+  }
+  // support for nested modifiers
+  @else {
+    $modifier: nth($modifiers, 1);
+    $-nested-modifiers: append($-nested-modifiers, $modifier) !global;
+    $selector: -build-nested-modifiers-class();
   }
 
   @at-root #{$selector} {
     @content;
   }
+  //restore
+  $-nested-modifiers: $old-nested-modifiers !global;
+}
+
+/// @access private
+@function -build-shadow-class($block, $element, $value) {
+  // as modifier
+  @if prefixless($value) {
+    $value: selector-nest(bem-block($block, $value), $element);
+  }
+  // as append
+  @else {
+    $value: selector-nest(selector-append($block, $value), $element);
+  }
+  // context
+  @if $-scope {
+    $value: selector-nest($-scope, $value);
+  }
+  @return $value;
 }
 
 /// inherit parent status, only use inner element
 /// @example
-///  .b {
+///  @include block(b) {
 ///     @include element(a) {
-///       @include shadow(c) {     //=> .b.c .b__a
+///       @include shadow(c) {                    //=> .b--c .b__a
 ///         color: red;
 ///       }
+///       @include shadow('.active') {}           // .b.active .b__a
+///       @include shadow(':hover', ':focus') {}  // .b:hover .b__a, .b:focus .b__a
 ///     }
 ///   }
-$no-parse-prefixs: ('.' '#' ':' '::' '*');
-@function prefixer($value, $addPrefix: true, $prefix: '.') {
-  @if $addPrefix and not index($no-parse-prefixs, str-slice($value, 1, 1)) {
-    @return $prefix + $value;
-  } 
-  @return $value;
-}
-
-@mixin shadow($parent, $addPrefix: true, $prefix: '.') {
+/// @param {String} $block-states... - block state or modifier
+@mixin shadow($block-states...) {
   $selector: null;
 
-  @if is-list($parent) {
+  @if $-block == null or $-element == null {
+    @error 'Shadow error: shadow should be called within element.';
+  }
+  @if -is-element-group($-element) {
+    @error 'Shadow error: shadow should not be called within `element group(#{inspect(map-get($-element, elements))})`.';
+  }
+
+  $block:   bem-block($block);
+  $element: bem-element($block, nth(map-get($element, elements), 1));
+
+  @if length($block-states) > 1 {
     $selectors: ();
-    @each $value in $parent {
-      $value: prefixer($value, $addPrefix, $prefix);
-      $value: selector-append($-parent, $value);
-      $selectors: append($selectors, selector-nest($value, &),comma);
+    @each $value in $block-states {
+      $selectors: append(
+        $selectors,
+        -build-shadow-class($block, $element, $value),
+        comma);
     }
     $selector: selector-parse($selectors);
-  } 
+  }
   @else {
-    $value: prefixer($parent, $addPrefix, $prefix);
-    $selector: selector-nest(selector-append($-parent, $value), &);
+    $selector: -build-shadow-class($block, $element, nth($block-states, 1));
   }
 
   @at-root #{$selector} {
@@ -89,16 +281,87 @@ $no-parse-prefixs: ('.' '#' ':' '::' '*');
   }
 }
 
+/// see {mixin} block
+@mixin b($block...) {
+  @include block($block...) {
+    @content;
+  }
+}
 /// see {mixin} element
-@mixin e($element) {
-  @include element {
+@mixin e($element...) {
+  @include element($element...) {
     @content;
   }
 }
 
 /// see {mixin} modifier
-@mixin m($modifier){
-  @include modifier {
+@mixin m($modifier...){
+  @include modifier($modifier...) {
     @content;
   }
+}
+
+
+$no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
+@function prefixless($value) {
+  @if not is-string($value) {
+    @return false;
+  }
+  $i: 1;
+  $l: str-length($value) / 2;
+  @while $i <= $l {
+    $c: str-slice($value, $i, $i);
+    $i: $i + 1;
+    @if $c != ' ' {
+      @if index($no-parse-prefixs, $c) != null {
+        @return false;
+      } @else {
+        @return true;
+      }
+    }
+  }
+  @return true;
+}
+
+@function prefixer($value, $addPrefix: true, $prefix: '.') {
+  @if $addPrefix and prefixless($value) {
+    @return $prefix + $value;
+  }
+  @return $value;
+}
+
+/// generate element class name
+/// @access public
+/// @param {String} $block - block name
+/// @param {String} $element - element name
+/// @param {String} $modifiers... - one or more modifier
+@function bem-element($block,$element, $modifiers...) {
+  @return bem-block($block + $element-separator + $element, $modifiers...);
+}
+
+/// generate block class name
+/// @access public
+/// @param {String} $block - block name
+/// @param {String} $modifiers... - one or more modifier
+@function bem-block($block, $modifiers...) {
+  $selector: null;
+  $block: prefixer($block);
+
+  @if length($modifiers) > 0 {
+    // combinded style modifier
+    @if $combined-style-modifier {
+      $selector: $block;
+      @each $modifier in $modifiers {
+        $selector: selector-append($selector, prefixer($modifier-separator + $modifier));
+      }
+    }
+    @else {
+      $selector: $block +
+              '#{if(length($modifiers) > 0, $modifier-separator + list-join($modifiers, $modifier-separator), "")}';
+    }
+  }
+  @else {
+    $selector: $block;
+  }
+  @return $selector;
 }

@@ -53,3 +53,7 @@ $-absolute-length: ('cm' 'mm' 'in' 'px' 'pt' 'pc');
 @function is-list($value) {
   @return type-of($value) == 'list';
 }
+
+@function is-string($value) {
+  @return type-of($value) == 'string';
+}

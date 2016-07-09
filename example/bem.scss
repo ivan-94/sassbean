@@ -1,48 +1,115 @@
 @import "../scss/helpers";
 
-.a {
-  @include element(b) {         //.a__b
-    @include shadow(c) {        //.a.c .a__b
-      color: red;
-    }
-  }
-
-  @include element(d) {       //.a__d
-    @include shadow(e) {      //.a.e .a__d
+/* test block */
+@include block(block) {                //.block{}
+  color: red;
+  @include element(element) {          //.block__element{}
+    color: blue;
+    /*
+    @include element(nested-element) { //Error here: don't nest element into element
       color: blue;
     }
-
-    @include element(f) {    //.a__d__f  //don't nest more than one level
-      color: green;
-      @include shadow(g) {   //.a__d.g .a__d__f
-        color: yellow;
-      }
-    }
-    @include shadow(h) {    //.a.h .a__d
-      color: white;
-    }
-    //mutlti shadow
-    //.a.disable .a__d, .a.large .a__d, .a.primary .a__d
-    @include shadow(disable large primary) { 
-      color: red;
-    }
-
-    //.a:hover .a__d, .a:active .a__d, .a:focus .a__d
-    @include shadow(':hover' ':active' ':focus') {  // don't use comma
-      color: blue;
-    }
+    */
   }
-}
-
-
-// modifier
-
-.a {
-  @include modifier('large') {  // .a--large
+  /*
+  @include block(another-block) {      //Error here: can not nest block into block
     color: red;
   }
-  $combined-modifier: true !global;
-  @include modifier('small') { // .a.--small
-    color: blue;
+  */
+
+  @include element(element1, element2) { // .block__element1, .block__element2 {}
+    /* element group */
+    color: red;
   }
 }
+
+/* test scope */
+.a {                                     // in '.a' context
+  @include block(block2) {               // .a .block2
+    color: red;
+    @include element(element) {          // .a .block2__element
+      color: red;
+    }
+  }
+}
+
+/*test modifier */
+.a {
+  @include block(block) {
+    color: red;
+    /*block modifiers */
+    @include modifier(one, two, three) {  //.block--one, .block--two, .block--three
+      /*modifier group */
+      color: red;
+    }
+    @include modifier(A) {
+      /* nested modifiers */
+      @include modifier(B) {              //.a .block--A--B
+        color: red;
+      }
+      @include modifier(C) {             //.a .block--A--B--C
+        color: red;
+        @include modifier(D) {           //.a .block--A--B--C--D
+          color: red;
+        }
+      }
+    }
+
+    /* element modifiers */
+    @include element(element) {
+      @include modifier(one, two) {     // .a .block__element--one, .a .block__element--two
+        /* element modifier group */
+        color: red;
+      }
+      @include modifier(A) {
+        /* nested modifiers */
+        @include modifier(B) {
+          @include modifier(C) {
+            color: red;                 // .a .block__element--A--B--C
+          }
+        }
+      }
+    }
+  }
+}
+
+/* test combine style modifier */
+$combined-style-modifier: true;       // enable combined style
+@include block(block-combined-style) {
+
+  @include modifier(A) {              //.block-combined-style.--A
+    color: red;
+  }
+  //modifier group
+  @include modifier(B, C) {          //.block-combined-style.--B, .block-combined-style.--C
+    color: red;
+  }
+  // nested modifiers
+  @include modifier(D) {
+    @include modifier(E) {           //.block-combined-style.--D.--E
+      color: red;
+    }
+  }
+
+  // element modifier
+  @include  element(element) {
+    @include modifier(A) {          //.block-combined-style__element.--A
+      color: red;
+    }
+  }
+}
+
+/* test shadow */
+$combined-style-modifier: false;
+@include block(A) {
+  @include element(B) {
+    color: red;
+    @include shadow(active) {      //.A--active .A__B
+      color: red;
+    }
+    @include shadow(':focus',':active') {
+      color: red;
+    }
+  }
+}
+@debug $-block;
