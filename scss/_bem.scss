@@ -4,11 +4,21 @@
 ////
 
 //TODO
-//debug
 //theme
-//namespace
-//at
 
+/// enable namespace
+/// @type {Boolean}
+$enable-namespace: false !default;
+
+/// block namespace prefix
+/// @type {Map}
+$block-namespace-prefix: (
+  'utility': 'u',
+  'object': 'o',
+  'component': 'c',
+) !default;
+
+$theme-namespace-prefix: 't' !default;
 
 /// define element separator
 /// @type {String}
@@ -22,6 +32,16 @@ $modifier-separator: '--' !default;
 /// the prefix of modifier depend on $modifier-separator
 /// @type {Boolean}
 $combined-style-modifier: false !default;
+
+/// responsive suffix
+/// NOTE: '@' is not a valid selector, you have to escape before passing it on
+/// @type {String}
+/// @link http://csswizardry.com/2015/08/bemit-taking-the-bem-naming-convention-a-step-further/
+$responsive-suffix: '\\@' !default;  // or _at_
+
+
+
+
 
 
 // name convention: `-` prefix to indicate private function or variables
@@ -51,16 +71,20 @@ $-current-level: null;
 $-nested-modifiers: ();
 
 /// define a Block
+/// it does not force to use namescpace, because some blocks were known to every one that we don't
+/// need to add namescpaces to them. such as grid, button
 /// @access public
 /// @alias b
 /// @param {String} $block - Block's name
-@mixin block($block) {
+/// @param {String} $ns -    namescpace of this block
+@mixin block($block, $ns: null) {
   $-prev-level: $-current-level;
   $-current-level: block !global;
 
   @if $-block != null {
     @warn 'Block nested Error: It should not be called within another block(`#{inspect($-block)}`)';
   }
+  $block: add-namespace($block, $ns);
   // set current scope
   $-scope: & !global;
   // set current block
@@ -76,7 +100,6 @@ $-nested-modifiers: ();
   //restore
   $-current-level: $-prev-level !global;
 }
-
 
 
 /// Block Element
@@ -175,8 +198,8 @@ $-nested-modifiers: ();
     @error 'Shadow error: shadow should not be called within `element group(#{inspect(map-get($-element, elements))})`.';
   }
 
-  $block:   bem-block($block);
-  $element: bem-element($block, nth(map-get($element, elements), 1));
+  $block:   bem-block($-block);
+  $element: bem-element($block, nth(map-get($-element, elements), 1));
 
   @if length($block-states) > 1 {
     $selectors: ();
@@ -197,27 +220,71 @@ $-nested-modifiers: ();
   }
 }
 
-/// see {mixin} block
-@mixin b($block...) {
-  @include block($block...) {
-    @content;
+
+/// act like modifier
+/// see breakpoint
+/// @param {String} $breakpoint - breakpoint name defined in $breakpoints
+/// @example
+///   @include block(block) {
+///     @include at(large) {                              @media screen and (#{large}) { .block\@large {} }
+///       width: 90px;
+///     }
+///     @include element(element) {
+///       @include at(large) {                            @media screen and (#{large}) {.block__element\@large {}}
+///         width: 100px;
+///       }
+///     }
+///     @include element(A, B, C) {
+///        @include at(larget) {...}                      @media screen and (#{large}) {.block__A\@large, .block__B\@large, .block__C\@large{...} }
+///     }
+///   }
+@mixin at($breakpoint) {
+  $selector:null;
+  @if $-current-level != block and $-current-level != element {
+    @error 'Responsive suffix error: responsive suffix(at) should be called within block or element: (at#{(inspect($breakpoint))})';
   }
-}
-/// see {mixin} element
-@mixin e($element...) {
-  @include element($element...) {
-    @content;
+  @if not breakpoint-exists($breakpoint) {
+    @error 'Breakpoint error: breakpoint(`#{$breakpoint}`) non-exists. Available breakpoints: #{inspect(map-keys($breakpoints))}';
+  }
+
+  @if $-current-level == block {
+    $selector: bem-block-at($-block,$breakpoint);
+  }
+  @else {
+    @if -is-element-group($-element) {
+      $elements: -get-element($-element, true);
+      $selectors: ();
+      @each $ele in $elements {
+        $selectors: append($selectors, bem-element-at($-block, $ele, $breakpoint), comma);
+      }
+      $selector: selector-parse($selectors);
+    } @else {
+      $selector: bem-element-at($-block, -get-element($-element), $breakpoint);
+    }
+  }
+
+  // media
+  @include breakpoint($breakpoint) {
+    @at-root #{$selector} {
+      @content;
+    }
   }
 }
 
-/// see {mixin} modifier
-@mixin m($modifier...){
-  @include modifier($modifier...) {
-    @content;
-  }
+@mixin theme($name) {
+
 }
-
-
+/// show current context
+/// @access private
+@mixin bem-debug {
+  @debug '--';
+  @debug '<current-level: #{$-current-level}>';
+  @debug '<scope:         #{$-scope}>';
+  @debug '<block:         #{$-block}>';
+  @debug '<element:       #{inspect($-element)}>';
+  @debug '<modifier:      #{inspect($-nested-modifiers)}>';
+  @debug '--';
+}
 
 /// generate element class name
 /// @access public
@@ -255,7 +322,30 @@ $-nested-modifiers: ();
   @return $selector;
 }
 
+/// generate block responsive suffix class name
+/// @access public
+/// @param {String} $block - block name
+/// @param {String} $breakpoint - breakpoint name
+@function bem-block-at($block,$breakpoint) {
+  @return #{prefixer($block)}#{$responsive-suffix}#{$breakpoint};
+}
 
+/// generate element responsive suffix class name
+/// @access public
+/// @param {String} $block - block name
+/// @param {String} $element - element name
+/// @param {String} $breakpoint - breakpoint name
+@function bem-element-at($block, $element, $breakpoint) {
+  @return #{bem-element($block, $element)}#{$responsive-suffix}#{$breakpoint};
+}
+
+/// return whether a string has prefix.
+/// @access public
+/// @param {String} $value
+/// @example
+///   prefixless(a)    => true
+///   prefixless('.a') => false
+///   prefixless(':a') => false
 $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
 @function prefixless($value) {
   @if not is-string($value) {
@@ -277,8 +367,11 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return true;
 }
 
-@function prefixer($value, $addPrefix: true, $prefix: '.') {
-  @if $addPrefix and prefixless($value) {
+/// Automatic add prefix to a string
+/// @param {String} $value
+/// @param {String} $prefix
+@function prefixer($value, $prefix: '.') {
+  @if prefixless($value) {
     @return $prefix + $value;
   }
   @return $value;
@@ -302,8 +395,12 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
 
 /// get first elements in element-desc
 /// @access private
-@function -get-element($element-desc) {
-  @return nth(map-get($element-desc, elements), 1);
+@function -get-element($element-desc, $list: false) {
+  @if $list {
+    @return map-get($element-desc, elements);
+  } @else {
+    @return nth(map-get($element-desc, elements), 1);
+  }
 }
 
 /// test if current element context is `element group`
@@ -370,4 +467,19 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     $value: selector-nest($-scope, $value);
   }
   @return $value;
+}
+
+
+/// add namescpace prifix to block
+/// @access private
+@function add-namespace($name, $namescpace) {
+  @if $enable-namespace and $namescpace != null {
+    @if map-has-key($block-namespace-prefix, $namescpace) {
+      @return map-get($block-namespace-prefix, $namescpace) + '-' + $name;
+    } @else {
+      @error 'Namespace Error: unknown namescpace(#{inspect($namescpace)}) when define block(#{$name}, #{inspect($namescpace)})' +
+      '. Available namespace: (#{inspect(map-keys($block-namespace-prefix))})';
+    }
+  }
+  @return $name;
 }

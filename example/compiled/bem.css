@@ -101,3 +101,39 @@
 .A:focus .A__B, .A:active .A__B {
   color: red;
 }
+
+/* test namescpace */
+.c-block {
+  color: red;
+}
+
+.c-block__element--modifier {
+  color: red;
+}
+
+/* test responsive-suffix */
+.B\@small {
+  width: 100px;
+}
+
+@media screen and (min-width: 64em) {
+  .B\@large {
+    width: 100px;
+  }
+}
+
+@media screen and (min-width: 64em) {
+  .B__A\@large {
+    width: 100px;
+  }
+}
+
+.B__C, .B__D, .B__E {
+  width: 100px;
+}
+
+@media screen and (min-width: 64em) {
+  .B__C\@large, .B__D\@large, .B__E\@large {
+    width: 100px;
+  }
+}

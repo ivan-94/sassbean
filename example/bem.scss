@@ -5,6 +5,7 @@
   color: red;
   @include element(element) {          //.block__element{}
     color: blue;
+    @include bem-debug;
     /*
     @include element(nested-element) { //Error here: don't nest element into element
       color: blue;
@@ -20,6 +21,7 @@
   @include element(element1, element2) { // .block__element1, .block__element2 {}
     /* element group */
     color: red;
+    @include bem-debug;
   }
 }
 
@@ -29,6 +31,7 @@
     color: red;
     @include element(element) {          // .a .block2__element
       color: red;
+      @include bem-debug;
     }
   }
 }
@@ -50,6 +53,7 @@
       @include modifier(C) {             //.a .block--A--B--C
         color: red;
         @include modifier(D) {           //.a .block--A--B--C--D
+          @include bem-debug;
           color: red;
         }
       }
@@ -112,4 +116,41 @@ $combined-style-modifier: false;
     }
   }
 }
-@debug $-block;
+
+/* test namescpace */
+$enable-namespace: true;
+@include  block(block, component) { //.c-block
+  color: red;
+  @include element(element) {       //.c-block__element
+    @include modifier(modifier) {   //.c-block__element--modifier
+      color: red;
+    }
+  }
+}
+
+
+/* test responsive-suffix */
+@include block(B) {
+  // block responsive-suffix
+  @include at(small) {
+    width: 100px;
+  }
+  @include at(large) {
+    width: 100px;
+  }
+
+  // element responsive-suffix
+  @include element(A) {
+    @include at(large) {
+      width: 100px;
+    }
+  }
+
+  // element group responsive-suffix
+  @include element(C, D, E) {
+    width: 100px;
+    @include at(large) {
+      width: 100px;
+    }
+  }
+}

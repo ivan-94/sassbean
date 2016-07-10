@@ -76,14 +76,14 @@ $breakpoint-classes:  (small medium large) !default;
 
       @if index(('gt' 'lt'),$operator) and $val {
         @if $val > 0em {
-          @return "(#{if($operator == 'gt','min','max')}-width: #{$val})"
+          @return "(#{if($operator == 'gt','min','max')}-width: #{$val})";
         }
       } @else {
         @warn "`#{$val}` is not valid number or #{$operator} is not a valid operator.";
       }
     }
 
-    // keyword to keyword
+    // <keyword> to <keyword>
     @else if length($condition) == 3 {
       $start:    parse-keyword(nth($condition,1));
       $end:      parse-keyword(nth($condition,3));
@@ -133,6 +133,7 @@ $breakpoint-classes:  (small medium large) !default;
     @return null;
   }
 }
+
 
 
 /// Wrap a media query around the content you put inside the mixin
@@ -194,4 +195,8 @@ $breakpoint-classes:  (small medium large) !default;
     }
     @return map-get($map, $anchor);
   }
+}
+
+@function breakpoint-exists($value) {
+  @return map-has-key($breakpoints, $value);
 }
