@@ -286,15 +286,6 @@ $-nested-modifiers: ();
   }
 }
 
-/// @access private
-@function -build-theme-class($name) {
-  @if $enable-namespace && $theme-namespace-prefix != null {
-    @return prefixer($theme-namespace-prefix + '-' + $name);
-  } @else {
-    @return prefixer($name);
-  }
-}
-
 /// define theme
 /// unshift a theme class to head of descendant combinator
 /// @param {String} $name - theme name
@@ -495,7 +486,12 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
 
   $selectors: ();
   @each $modifier in $modifiers {
-    $selector: bem-block($modified-object, $modifier);
+    $selector: null;
+    @if $modifier == & {
+      $selector: $modified-object;
+    } @else {
+      $selector: bem-block($modified-object, $modifier);
+    }
     @if $-scope != null {
       $selector: selector-nest($-scope, $selector);
     }
@@ -544,4 +540,13 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     }
   }
   @return $name;
+}
+
+/// @access private
+@function -build-theme-class($name) {
+  @if $enable-namespace && $theme-namespace-prefix != null {
+    @return prefixer($theme-namespace-prefix + '-' + $name);
+  } @else {
+    @return prefixer($name);
+  }
 }

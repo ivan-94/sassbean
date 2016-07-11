@@ -41,10 +41,16 @@
   @include block(block) {
     color: red;
     /*block modifiers */
-    @include modifier(one, two, three) {  //.block--one, .block--two, .block--three
+    @include modifier(one, two, three) {  //a .block--one, .a .block--two, .a .block--three
       /*modifier group */
       color: red;
     }
+
+    // default modifier
+    @include modifier(&, A, B) {        // .a .block, .a .block--A, .a .block--B
+      color: red;
+    }
+
     @include modifier(A) {
       /* nested modifiers */
       @include modifier(B) {              //.a .block--A--B

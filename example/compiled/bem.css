@@ -43,6 +43,10 @@
   color: red;
 }
 
+.a .block, .a .block--shit, .a .block--you {
+  color: red;
+}
+
 .a .block--A {
   /* nested modifiers */
 }
