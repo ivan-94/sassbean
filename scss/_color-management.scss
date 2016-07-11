@@ -1,5 +1,86 @@
 // Some suggestions about color management
 ////
-/// @group suggestion
+/// @group color-management
 ////
 
+
+/// define global theme palette
+/// @type {Map}
+$-global-theme-palette: ();
+
+/// default foreground
+/// @access public
+/// @type {Color}
+$foreground-white: white !default;
+
+/// @access public
+/// @type {Color}
+$foreground-black: black !default;
+
+/// add theme
+/// @param {String} $name - theme name
+/// @param {Map}    $palette - specfic palette
+@function add-theme($name, $palette) {
+  @if map-has-key($-global-theme-palette, $name) {
+    @warn 'theme(`#{$name}`) alreay exist, you will replace it.'
+  }
+  $-global-theme-palette: map-merge($-global-theme-palette, (#{$name}: $palette));
+}
+
+@function get-theme($name) {
+  @return map-get($-global-theme-palette, $name);
+}
+
+/// get color from global theme pallette
+@function get-color($theme, $name) {
+  $theme: get-theme($theme);
+  @if $theme != null {
+    @return: map-get($theme, $name);
+  }
+  @return null;
+}
+
+/// iterate global theme palette
+@mixin each-theme {
+  @each $theme-name, $theme-pallette in $-global-theme-palette  {
+    $theme-name: $theme-name !global;
+    $theme-pallette: $theme-name !global;
+    @content;
+  }
+}
+
+/// smart foreground
+/// @param {Color|List} $color - color to determine foreground, color or list, list syntax like ($background, $foreground, $background-stated, $foreground-state)
+/// @param {Color} $black  - color to return if `$color` is light
+/// @param {Color} $white  - color to return if `$color` is dark
+/// @param {Percentage} $threshold  - threshold of lightness to check against
+/// @return {Color}
+@function foreground($color, $black: $foreground-black, $white: $foreground-white, $threshold: 60%) {
+  @if is-list($color) {
+    @return nth($color, 2);
+  } @else if is-color($color) {
+    @if lightness($color) > $threshold {
+      @return $black;
+    }
+    @else {
+      @return $white;
+    }
+  } @else {
+    @error 'invalid $color, expected type are Color or List, but actually is #{type-of($color)}';
+  }
+}
+
+@function background($color) {
+  @if is-list($color) {
+    @return nth($color, 1);
+  }
+}
+
+/// from foundation-site
+@function smart-scale($color, $scale: 5%, $threshold: 40%) {
+  // light
+  @if lightness($color) > $threshold {
+    $scale: -$scale;
+  }
+  @return scale-color($color, $lightness: $scale);
+}

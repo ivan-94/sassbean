@@ -137,3 +137,40 @@
     width: 100px;
   }
 }
+
+/* test theme */
+.t-light .block {
+  color: red;
+}
+
+.t-light .block2 {
+  color: blue;
+}
+
+.t-light .block2__element {
+  color: red;
+}
+
+.t-light .block2__element--modifier {
+  color: blue;
+}
+
+.t-light .block2--modifier {
+  color: blue;
+}
+
+.block {
+  color: blue;
+}
+
+.t-light .block__element {
+  color: red;
+}
+
+.block__element {
+  color: red;
+}
+
+.t-light .block__element--modifier {
+  color: red;
+}

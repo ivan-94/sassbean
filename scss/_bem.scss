@@ -3,12 +3,9 @@
 /// @author Ivan lee
 ////
 
-//TODO
-//theme
-
 /// enable namespace
 /// @type {Boolean}
-$enable-namespace: false !default;
+$enable-namespace: true !default;
 
 /// block namespace prefix
 /// @type {Map}
@@ -44,7 +41,7 @@ $responsive-suffix: '\\@' !default;  // or _at_
 
 
 
-// name convention: `-` prefix to indicate private function or variables
+// Name convention: `-` prefix to indicate private function or variables
 // private global shared varibles
 
 /// @access private
@@ -66,8 +63,10 @@ $-element: null;  //store current element
 /// @type {selector}
 $-scope: null;   //store current &
 
-/// indicate current level
+/// indicate current level, block or element
 $-current-level: null;
+/// indicate current theme, theme will inject into current scope
+$-theme: null;
 $-nested-modifiers: ();
 
 /// define a Block
@@ -76,28 +75,44 @@ $-nested-modifiers: ();
 /// @access public
 /// @alias b
 /// @param {String} $block - Block's name
-/// @param {String} $ns -    namescpace of this block
+/// @param {String} $ns -    optional. namescpace of this block. Value can be 'object', 'utility' and 'component'.
+/// @example
+///   @include block(block) {}  // => .block
+///   @include block(block, object) {}  // => .o-block
+///   @include block(block, utility) {}  // => .u-block
+///   @include block(block, component) {}  // => .c-block
 @mixin block($block, $ns: null) {
-  $-prev-level: $-current-level;
-  $-current-level: block !global;
-
   @if $-block != null {
     @warn 'Block nested Error: It should not be called within another block(`#{inspect($-block)}`)';
   }
-  $block: add-namespace($block, $ns);
-  // set current scope
-  $-scope: & !global;
-  // set current block
-  $-block: $block !global;
 
-  #{prefixer($block)} {
+  //store
+  $-prev-level: $-current-level;
+  $-current-level: block !global;
+  $old-scope: $-scope;
+
+  // set current block
+  $block: add-namespace($block, $ns);
+  $-block: $block !global;
+  $block: prefixer($block);
+
+  // set current scope
+  // within theme context
+  @if $-scope != null and $-theme != null {
+    $-scope: '#{$-scope} #{&}' !global;
+  } @else {
+    $-scope: & !global;
+  }
+
+  @at-root '#{$-scope} #{$block}' {
     @content;
   }
 
+
   //reset
   $-block: null !global;
-  $-scope: null !global;
   //restore
+  $-scope: $old-scope !global;
   $-current-level: $-prev-level !global;
 }
 
@@ -271,9 +286,56 @@ $-nested-modifiers: ();
   }
 }
 
-@mixin theme($name) {
-
+/// @access private
+@function -build-theme-class($name) {
+  @if $enable-namespace && $theme-namespace-prefix != null {
+    @return prefixer($theme-namespace-prefix + '-' + $name);
+  } @else {
+    @return prefixer($name);
+  }
 }
+
+/// define theme
+/// unshift a theme class to head of descendant combinator
+/// @param {String} $name - theme name
+/// @example
+///   //without block
+///   @include theme(light) {
+///     @include block(block) {      // => .t-light .block
+///       @include element(element)  // => .t-light .block__element
+///    }
+///   }
+///   //within block
+///   @include block(block2) {       // => .block
+///      @include theme(light) {
+///        @include element(element) // => .t-light .block__element
+///      }
+///   }
+@mixin theme($name) {
+  //already defined
+  @if $-theme != null {
+    @error 'Theme error: theme alreay defined(`#{$-theme}`)';
+  }
+
+  $-theme: $name !global;
+  $old-scope: $-scope;
+  $theme-class: -build-theme-class($name);
+
+  @if $old-scope == null {
+    $-scope: $theme-class !global;
+  } @else {
+    $-scope: selector-nest($theme-class, $old-scope) !global;
+  }
+
+  @at-root {
+    @content;
+  }
+
+  //reset
+  $-scope: $old-scope !global;
+  $-theme: null !global;
+}
+
 /// show current context
 /// @access private
 @mixin bem-debug {

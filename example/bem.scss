@@ -154,3 +154,42 @@ $enable-namespace: true;
     }
   }
 }
+
+
+/* test theme */
+// theme without block
+@include theme(light) {
+  @include block(block) {          //.t-light .block
+    color: red;
+  }
+  @include block(block2) {         //.t-light .block2
+    color: blue;
+    @include element(element) {    //.t-light .block__element
+      color: red;
+      @include modifier(modifier) {
+        color: blue;
+      }
+    }
+    @include modifier(modifier) {  //.t-light .block2--modifier
+      color: blue;
+    }
+  }
+}
+
+// theme within block
+@include block(block) {
+  color: blue;
+  @include theme(light) {
+    @include element(element) {
+      color: red;
+    }
+  }
+  @include element(element) {
+    color: red;
+    @include theme(light) {
+      @include modifier(modifier) {
+        color: red;
+      }
+    }
+  }
+}
