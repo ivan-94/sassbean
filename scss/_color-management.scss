@@ -24,7 +24,8 @@ $foreground-black: black !default;
   @if map-has-key($-global-theme-palette, $name) {
     @warn 'theme(`#{$name}`) alreay exist, you will replace it.'
   }
-  $-global-theme-palette: map-merge($-global-theme-palette, (#{$name}: $palette));
+  $-global-theme-palette: map-merge($-global-theme-palette, (#{$name}: $palette)) !global;
+  @return $-global-theme-palette;
 }
 
 @function get-theme($name) {
@@ -35,7 +36,7 @@ $foreground-black: black !default;
 @function get-color($theme, $name) {
   $theme: get-theme($theme);
   @if $theme != null {
-    @return: map-get($theme, $name);
+    @return map-get($theme, $name);
   }
   @return null;
 }
@@ -74,6 +75,7 @@ $foreground-black: black !default;
   @if is-list($color) {
     @return nth($color, 1);
   }
+  @return null;
 }
 
 /// from foundation-site

@@ -1,0 +1,42 @@
+@include test-module('color-management') {
+  @include test('add-theme') {
+    $actual: add-theme(light,(primary: black, secondary: white));
+    $expect: (light: (primary: black, secondary: white));
+    @include assert-equal($actual, $expect);
+  }
+
+  @include test('get-theme') {
+    $actual: get-theme(light);
+    $expect: (primary: black, secondary: white);
+    @include assert-equal($actual, $expect);
+  }
+
+  @include test('get-color') {
+    $actual: get-color(light, secondary);
+    $expect: white;
+    @include assert-equal($actual, $expect);
+  }
+
+  @include test('test foreground') {
+    $case: (
+      (white, black) black,
+      black $foreground-white,
+      white $foreground-black,
+    );
+    @each $input, $expect in $case {
+      $actual: foreground($input);
+      @include assert-equal($actual, $expect);
+    }
+  }
+
+  @include test('test background') {
+    $case: (
+      (white, black) white,
+      black null
+    );
+    @each $input, $expect in $case {
+      $actual: background($input);
+      @include assert-equal($actual, $expect);
+    }
+  }
+}
