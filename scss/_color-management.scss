@@ -33,7 +33,7 @@ $foreground-black: black !default;
 }
 
 /// get color from global theme pallette
-@function get-color($theme, $name) {
+@function get-theme-color($theme, $name) {
   $theme: get-theme($theme);
   @if $theme != null {
     @return map-get($theme, $name);
@@ -51,7 +51,7 @@ $foreground-black: black !default;
 }
 
 /// smart foreground
-/// @param {Color|List} $color - color to determine foreground, color or list, list syntax like ($background, $foreground, $background-stated, $foreground-state)
+/// @param {Color|List} $color - color to determine foreground, color or list, list syntax like ($background, $foreground, $background-hover, $foreground-hover)
 /// @param {Color} $black  - color to return if `$color` is light
 /// @param {Color} $white  - color to return if `$color` is dark
 /// @param {Percentage} $threshold  - threshold of lightness to check against
@@ -77,6 +77,21 @@ $foreground-black: black !default;
   }
   @return null;
 }
+
+@function foreground-hover($color) {
+  @if is-list($color) and length($color) >= 3{
+    @return nth($color, 3);
+  }
+  @return null;
+}
+
+@function background-hover($color) {
+  @if is-list($color) and length($color) >= 4{
+    @return nth($color, 4);
+  }
+  @return null;
+}
+
 
 /// from foundation-site
 @function smart-scale($color, $scale: 5%, $threshold: 40%) {

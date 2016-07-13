@@ -489,9 +489,15 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     $selector: null;
     @if $modifier == & {
       $selector: $modified-object;
-    } @else {
+    }
+    @else if not prefixless($modifier) {
+      $selector: selector-append($modified-object, $modifier);
+    }
+
+    @else {
       $selector: bem-block($modified-object, $modifier);
     }
+
     @if $-scope != null {
       $selector: selector-nest($-scope, $selector);
     }

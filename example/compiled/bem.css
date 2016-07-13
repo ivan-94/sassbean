@@ -35,15 +35,23 @@
 .a .block {
   color: red;
   /*block modifiers */
+  /*modifier group */
   /* element modifiers */
 }
 
 .a .block--one, .a .block--two, .a .block--three {
-  /*modifier group */
   color: red;
 }
 
-.a .block, .a .block--shit, .a .block--you {
+.a .block, .a .block--A, .a .block--B {
+  color: red;
+}
+
+.a .block[disabled], .a .block[selected], .a .block--C {
+  color: red;
+}
+
+.a .block.disabled, .a .block::before, .a .block--C {
   color: red;
 }
 

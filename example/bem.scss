@@ -41,13 +41,22 @@
   @include block(block) {
     color: red;
     /*block modifiers */
+    /*modifier group */
     @include modifier(one, two, three) {  //a .block--one, .a .block--two, .a .block--three
-      /*modifier group */
       color: red;
     }
 
     // default modifier
     @include modifier(&, A, B) {        // .a .block, .a .block--A, .a .block--B
+      color: red;
+    }
+
+    // prifix modifier
+    @include modifier('[disabled]', '[selected]', C) {  // .a .block[disabled], .a .block[selected], .block--C
+      color: red;
+    }
+
+    @include modifier('.disabled', '::before', C) {  // .a .block.disabled, .a .block::before, .block--C
       color: red;
     }
 

@@ -11,8 +11,8 @@
     @include assert-equal($actual, $expect);
   }
 
-  @include test('get-color') {
-    $actual: get-color(light, secondary);
+  @include test('get-theme-color') {
+    $actual: get-theme-color(light, secondary);
     $expect: white;
     @include assert-equal($actual, $expect);
   }
