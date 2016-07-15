@@ -3,6 +3,7 @@
 ////
 @import "base/types";
 @import "base/list";
+@import "base/string";
 
 /// Determine if a value is falsey or empty;
 /// @param {Base} $val - Value to check

@@ -1,4 +1,5 @@
 // Some suggestions about color management
+// see example theme
 ////
 /// @group color-management
 ////
@@ -7,6 +8,14 @@
 /// define global theme palette
 /// @type {Map}
 $-global-theme-palette: ();
+
+/// all component's colour should depond on $global-palette
+/// @type {Map}
+$global-palette: null;
+
+/// default theme name, it will effect `each-theme` and `get-default-theme`
+/// @type {String}
+$default-theme-name: default !default;
 
 /// default foreground
 /// @access public
@@ -25,11 +34,23 @@ $foreground-black: black !default;
     @warn 'theme(`#{$name}`) alreay exist, you will replace it.'
   }
   $-global-theme-palette: map-merge($-global-theme-palette, (#{$name}: $palette)) !global;
+  //update default theme
+  @if $name == $default-theme-name {
+    $global-palette: $palette !global;
+  }
   @return $-global-theme-palette;
+}
+
+@mixin add-theme($arg...) {
+  $_: add-theme($arg...);
 }
 
 @function get-theme($name) {
   @return map-get($-global-theme-palette, $name);
+}
+
+@function get-default-theme() {
+  @return get-theme($default-theme-name);
 }
 
 /// get color from global theme pallette
@@ -43,11 +64,14 @@ $foreground-black: black !default;
 
 /// iterate global theme palette
 @mixin each-theme {
-  @each $theme-name, $theme-pallette in $-global-theme-palette  {
-    $theme-name: $theme-name !global;
-    $theme-pallette: $theme-name !global;
+  $old-global-palette: $global-palette;
+  // exclude default theme
+  @each $theme-name, $theme-palette in map-remove($-global-theme-palette, $default-theme-name)  {
+    $current-theme-name: $theme-name !global;
+    $global-palette: $theme-palette !global;
     @content;
   }
+  $global-palette: $old-global-palette !global;
 }
 
 /// smart foreground

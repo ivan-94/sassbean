@@ -1,0 +1,14 @@
+// share scss variable to javascript
+
+/// share scss variable to javascript
+/// @access public
+/// @param {String} $selector - a selector it will combine to meta tag
+/// @param {Map} $value       - a value to share
+@mixin variables-share($selector, $value) {
+  @if $value != null and is-map($value) {
+    $serialized-value: serialize($value);
+    meta#{$selector} {
+      font-family: '#{$serialized-value}';
+    }
+  }
+}

@@ -1,0 +1,34 @@
+////
+/// @group base
+////
+
+@function serialize($value) {
+  $result: ();
+  @if is-map($value) {
+    @each $key, $val in $value {
+      @if $val != null {
+        // list
+        @if is-list($val) {
+          $result: join($result, -parse-list($key, $val));
+        }
+        @else {
+          $result: append($result, "#{$key}=#{$val}");
+        }
+      }
+    }
+  }
+  @return list-join($result, '&');
+}
+
+/// @access private
+@function -parse-list ($key, $value) {
+  $result: ();
+  @if is-list($value) {
+    @each $item in $value {
+      @if $item != null {
+        $result: append($result, "#{$key}=#{$item}");
+      }
+    }
+  }
+  @return $result;
+}

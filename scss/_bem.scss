@@ -405,7 +405,7 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     @return false;
   }
   $i: 1;
-  $l: str-length($value) / 2;
+  $l: str-length($value);
   @while $i <= $l {
     $c: str-slice($value, $i, $i);
     $i: $i + 1;
