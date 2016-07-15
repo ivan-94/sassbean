@@ -1,0 +1,35 @@
+.example--success {
+  color: #6d3;
+}
+
+.example--alert {
+  color: #567;
+}
+
+.t-light .example--success {
+  color: green;
+}
+
+.t-light .example--alert {
+  color: red;
+}
+
+/* compiled result :;
+//default theme
+.example--success {
+  color: #6d3;
+}
+
+.example--alert {
+  color: #567;
+}
+
+//other theme
+.t-light .example--success {
+  color: green;
+}
+
+.t-light .example--alert {
+  color: red;
+}
+*/

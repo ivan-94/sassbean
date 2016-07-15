@@ -1,0 +1,14 @@
+
+@include test-module('test string') {
+
+  @include test('test serialize') {
+    $case: (
+      (a: 1, b: 2) "a=1&b=2",
+      (a: 'string', b: 1) "a=string&b=1",
+      (a: (1,2,3), b: 1) "a=1&a=2&a=3&b=1",
+    );
+    @each $input, $expect in $case {
+      @include assert-equal(serialize($input), $expect);
+    }
+  }
+}

@@ -1,0 +1,68 @@
+@import "../scss/helpers";
+
+/// define theme palette
+$default-theme-name: default;
+@include add-theme(light, (
+  success: green,
+  alert: red,
+));
+
+@include add-theme(default, (
+  success: #6d3,
+  alert: #567
+));
+
+/// all component's colour should depond on $global-palette
+$global-palette: get-default-theme();
+
+
+/// generate component theme
+@mixin generate-example-appearance {
+  @include block(example) {
+    @each $name, $color in $global-palette {
+      @include modifier($name) {
+        color: $color;
+      }
+    }
+  }
+}
+
+@mixin generate-example-theme {
+  @include each-theme {   //exclude default theme, because default theme without scope
+    @include theme($current-theme-name) {   //from _bem.scss
+      @include generate-example-appearance;
+    }
+  }
+}
+
+@mixin generate-example {
+  //default theme
+  @include generate-example-appearance;
+  //other theme
+  @include generate-example-theme;
+
+  @include block(example) {
+    // other rule
+  }
+}
+
+@include generate-example;
+/* compiled result :;
+//default theme
+.example--success {
+  color: #6d3;
+}
+
+.example--alert {
+  color: #567;
+}
+
+//other theme
+.t-light .example--success {
+  color: green;
+}
+
+.t-light .example--alert {
+  color: red;
+}
+*/
