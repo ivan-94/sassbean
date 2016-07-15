@@ -187,6 +187,9 @@ $-nested-modifiers: ();
   // support for nested modifiers
   @else {
     $modifier: nth($modifiers, 1);
+    @if not prefixless($modifier) {
+      @error 'Modifier error: Invalid modifier: #{inspect($modifier)}';
+    }
     $-nested-modifiers: append($-nested-modifiers, $modifier) !global;
     $selector: -build-nested-modifiers-class();
   }

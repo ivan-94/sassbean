@@ -77,6 +77,20 @@ $foreground-black: black !default;
   @return $keys;
 }
 
+@function set-default-theme($name) {
+  @if $default-theme-name != $name {
+    $default-theme-name: $name !global;
+    $global-palette: get-default-theme() !global;
+  }
+}
+
+@function get-default-theme-name($add-namespace: true) {
+  @if $add-namespace {
+    @return "#{$theme-namespace-prefix}-#{$default-theme-name}";
+  }
+  @return $default-theme-name;
+}
+
 /// iterate global theme palette
 @mixin each-theme($include-default: false) {
   $old-global-palette: $global-palette;
