@@ -62,6 +62,21 @@ $foreground-black: black !default;
   @return null;
 }
 
+/// get theme keys
+/// @param {Boolean} [true] $add-namespace - add namespace prefix(.t-) to key
+/// @return {List}
+@function get-theme-keys($add-namespace: true) {
+  $keys: map-keys($-global-theme-palette);
+  @if $add-namespace {
+    $result: ();
+    @each $key in $keys {
+      $result: append($result, "#{$theme-namespace-prefix}-#{$key}");
+    }
+    @return $result;
+  }
+  @return $keys;
+}
+
 /// iterate global theme palette
 @mixin each-theme {
   $old-global-palette: $global-palette;

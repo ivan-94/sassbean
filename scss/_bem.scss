@@ -92,7 +92,7 @@ $-nested-modifiers: ();
   $old-scope: $-scope;
 
   // set current block
-  $block: add-namespace($block, $ns);
+  $block: -add-namespace($block, $ns);
   $-block: $block !global;
   $block: prefixer($block);
 
@@ -536,7 +536,7 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
 
 /// add namescpace prifix to block
 /// @access private
-@function add-namespace($name, $namescpace) {
+@function -add-namespace($name, $namescpace) {
   @if $enable-namespace and $namescpace != null {
     @if map-has-key($block-namespace-prefix, $namescpace) {
       @return map-get($block-namespace-prefix, $namescpace) + '-' + $name;

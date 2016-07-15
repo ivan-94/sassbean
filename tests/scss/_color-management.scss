@@ -17,6 +17,13 @@
     @include assert-equal($actual, $expect);
   }
 
+  @include test('get-theme-keys') {
+    $actual: get-theme-keys();
+    $expect: append((), 't-light');
+    @debug inspect($actual);
+    @include assert-equal($actual, $expect);
+  }
+
   @include test('test foreground') {
     $case: (
       (white, black) black,
