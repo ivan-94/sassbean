@@ -1,5 +1,6 @@
 @import "../scss/helpers";
 
+
 /* test block */
 @include block(block) {                //.block{}
   color: red;
@@ -32,6 +33,16 @@
     @include element(element) {          // .a .block2__element
       color: red;
       @include bem-debug;
+    }
+  }
+}
+
+// semantical scope
+@include scope(bem-block(block)) {
+  @include block(block3) {              // .block .block3
+    color: red;
+    @include element(element) {         // .block .block3__element
+      color: red;
     }
   }
 }

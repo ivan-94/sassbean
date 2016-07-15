@@ -69,6 +69,14 @@ $-current-level: null;
 $-theme: null;
 $-nested-modifiers: ();
 
+/// scope, do nothing, just semantization
+/// @param {Selector} $selector - selector
+@mixin scope($selector) {
+  @at-root #{$selector} {
+    @content;
+  }
+}
+
 /// define a Block
 /// it does not force to use namescpace, because some blocks were known to every one that we don't
 /// need to add namescpaces to them. such as grid, button
