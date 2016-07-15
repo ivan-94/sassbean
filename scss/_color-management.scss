@@ -78,10 +78,16 @@ $foreground-black: black !default;
 }
 
 /// iterate global theme palette
-@mixin each-theme {
+@mixin each-theme($include-default: false) {
   $old-global-palette: $global-palette;
+
+  $iterator: $-global-theme-palette;
   // exclude default theme
-  @each $theme-name, $theme-palette in map-remove($-global-theme-palette, $default-theme-name)  {
+  @if not $include-default {
+    $iterator: map-remove($iterator, $default-theme-name);
+  }
+
+  @each $theme-name, $theme-palette in $iterator {
     $current-theme-name: $theme-name !global;
     $global-palette: $theme-palette !global;
     @content;
