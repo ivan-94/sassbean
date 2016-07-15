@@ -110,6 +110,10 @@
 }
 
 /* test shadow */
+.A {
+  /* shadow in element group */
+}
+
 .A__B {
   color: red;
 }
@@ -120,6 +124,18 @@
 
 .A:focus .A__B, .A:active .A__B {
   color: red;
+}
+
+.A__C, .A__D {
+  color: red;
+}
+
+.A--active .A__C, .A--active .A__D {
+  color: red;
+}
+
+.A:focus .A__C, .A:focus .A__D, .A--modifier .A__C, .A--modifier .A__D {
+  color: blue;
 }
 
 /* test namescpace */

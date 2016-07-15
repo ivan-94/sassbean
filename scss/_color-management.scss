@@ -53,6 +53,13 @@ $foreground-black: black !default;
   @return get-theme($default-theme-name);
 }
 
+@function set-default-theme($name) {
+  @if $default-theme-name != $name {
+    $default-theme-name: $name !global;
+    $global-palette: get-default-theme() !global;
+  }
+}
+
 /// get color from global theme pallette
 @function get-theme-color($theme, $name) {
   $theme: get-theme($theme);
@@ -77,12 +84,6 @@ $foreground-black: black !default;
   @return $keys;
 }
 
-@function set-default-theme($name) {
-  @if $default-theme-name != $name {
-    $default-theme-name: $name !global;
-    $global-palette: get-default-theme() !global;
-  }
-}
 
 @function get-default-theme-name($add-namespace: true) {
   @if $add-namespace {

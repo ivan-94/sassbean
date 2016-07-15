@@ -3,6 +3,13 @@
 /// @access public
 /// @group api
 ////
+@function to-list($value) {
+  @if is-list($value) {
+    @return $value;
+  } @else {
+    @return ($value,);
+  }
+}
 
 @function list-join($list, $separator) {
   $rt: nth($list, 1);

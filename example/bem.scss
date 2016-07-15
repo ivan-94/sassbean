@@ -137,8 +137,20 @@ $combined-style-modifier: false;
     @include shadow(active) {      //.A--active .A__B
       color: red;
     }
-    @include shadow(':focus',':active') {
+    @include shadow(':focus',':active') {  //.A:focus .A__B, .A:active .A__B
       color: red;
+    }
+  }
+  
+  /* shadow in element group */
+  @include element(C, D) {               // .A__C, .A__D
+    color: red;
+    @include shadow(active) {            // .A--active .A__C, A--active .A__D
+      color: red;
+    }
+
+    @include shadow(':focus', modifier) {  //.A:focus .A__C, .A:focus .A__D, .A--modifier .A__C, .A--modifier .A__D {
+      color: blue;
     }
   }
 }

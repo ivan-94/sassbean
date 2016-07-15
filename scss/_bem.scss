@@ -215,31 +215,13 @@ $-nested-modifiers: ();
 ///   }
 /// @param {String} $block-states... - block state or modifier
 @mixin shadow($block-states...) {
-  $selector: null;
-
-  @if $-block == null or $-element == null {
+  @if $-element == null {
     @error 'Shadow error: shadow should be called within element.';
   }
-  @if -is-element-group($-element) {
-    @error 'Shadow error: shadow should not be called within `element group(#{inspect(map-get($-element, elements))})`.';
-  }
 
-  $block:   bem-block($-block);
-  $element: bem-element($block, nth(map-get($-element, elements), 1));
-
-  @if length($block-states) > 1 {
-    $selectors: ();
-    @each $value in $block-states {
-      $selectors: append(
-        $selectors,
-        -build-shadow-class($block, $element, $value),
-        comma);
-    }
-    $selector: selector-parse($selectors);
-  }
-  @else {
-    $selector: -build-shadow-class($block, $element, nth($block-states, 1));
-  }
+  $block: bem-block($-block);
+  $elements: to-list(-get-element-class($block, $-element));
+  $selector: -build-shadow-class($block, $elements, $block-states);
 
   @at-root #{$selector} {
     @content;
@@ -473,6 +455,19 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return map-get($element-desc, is-group);
 }
 
+@function  -get-element-class($block, $element-desc) {
+  @if -is-element-group($element-desc) {
+    $elements: ();
+    @each $element in -get-element($element-desc, true) {
+      $elements: append($elements, bem-element($block, $element), comma);
+    }
+    @return selector-parse($elements);
+  }
+  @else {
+    @return bem-element($block, -get-element($element-desc));
+  }
+}
+
 /// @access private
 @function -get-modified-object($current-level, $block, $element-desc) {
   $modified-object: null;
@@ -527,22 +522,38 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     );
 }
 
-/// @access private
-@function -build-shadow-class($block, $element, $value) {
+@function -get-shadow-parent($block, $shadow) {
+  $selector: null;
   // as modifier
-  @if prefixless($value) {
-    $value: selector-nest(bem-block($block, $value), $element);
+  @if prefixless($shadow) {
+    $selector: bem-block($block, $shadow);
   }
   // as append
   @else {
-    $value: selector-nest(selector-append($block, $value), $element);
+    $selector: selector-append($block, $shadow);
   }
-  // context
+
   @if $-scope {
-    $value: selector-nest($-scope, $value);
+    $selector: selector-nest($-scope, $selector);
   }
-  @return $value;
+  @return $selector;
 }
+
+@function -build-shadow-class($block, $elements, $values) {
+  $selectors: ();
+  $parents: ();
+  @each $val in $values {
+    $parents: append($parents, -get-shadow-parent($block, $val), comma);
+  }
+
+  @each $parent in $parents {
+    @each $element in $elements {
+      $selectors: append($selectors, selector-nest($parent, $element), comma);
+    }
+  }
+  @return selector-parse($selectors);
+}
+
 
 
 /// add namescpace prifix to block
