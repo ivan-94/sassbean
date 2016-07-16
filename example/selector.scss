@@ -1,0 +1,25 @@
+@import "../scss/helpers";
+
+.control {
+  @include append-to(textarea) { // textarea.control
+    color: red;
+  }
+}
+
+textarea {
+  @include append('.control') {  // textarea.control
+    color: red;
+  }
+}
+
+.control {
+  @include nest-to(textarea) { // textarea .control
+    color: red;
+  }
+}
+
+textarea {
+  @include nest('.control') {  // textarea .control
+    color: red;
+  }
+}

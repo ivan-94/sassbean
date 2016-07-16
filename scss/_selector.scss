@@ -1,0 +1,38 @@
+
+/// like selector-append
+/// @example
+///   .control {
+///     @include append-to(textarea) {  //=> textarea.control
+///       max-width: 100%;
+///     }
+///   }
+@mixin append-to($selector) {
+  @at-root #{$selector}#{&} {
+    @content;
+  }
+}
+
+
+/// @example
+///   textarea {
+///     @include append('.control') {  //=> textarea.control
+///       max-width: 100%;
+///     }
+///   }
+@mixin append($selector) {
+  @at-root #{&}#{$selector} {
+    @content;
+  }
+}
+
+@mixin nest-to($selector) {
+  @at-root #{$selector} #{&} {
+    @content;
+  }
+}
+
+@mixin nest($selector) {
+  @at-root #{&} #{$selector} {
+    @content;
+  }
+}
