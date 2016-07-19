@@ -200,3 +200,7 @@ $breakpoint-classes:  (small medium large) !default;
 @function breakpoint-exists($value) {
   @return map-has-key($breakpoints, $value);
 }
+
+@mixin share-breakpoints-to-js($selector) {
+  @include variables-share($selector, $breakpoints);
+}

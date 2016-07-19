@@ -2,14 +2,30 @@ textarea.control {
   color: red;
 }
 
+textarea.control, select.control, input.control {
+  color: red;
+}
+
 textarea.control {
   color: red;
 }
 
-textarea .control {
+textarea.control, textarea.control1 {
   color: red;
 }
 
 textarea .control {
+  color: red;
+}
+
+textarea .control, select .control, input .control {
+  color: red;
+}
+
+textarea .control {
+  color: red;
+}
+
+textarea .control, textarea .control1 {
   color: red;
 }

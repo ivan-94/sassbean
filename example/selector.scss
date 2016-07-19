@@ -4,10 +4,18 @@
   @include append-to(textarea) { // textarea.control
     color: red;
   }
+  // group
+  @include append-to(textarea, select, input) {
+    color: red;
+  }
 }
 
 textarea {
   @include append('.control') {  // textarea.control
+    color: red;
+  }
+  // group
+  @include append('.control', '.control1') {
     color: red;
   }
 }
@@ -16,10 +24,19 @@ textarea {
   @include nest-to(textarea) { // textarea .control
     color: red;
   }
+  // group
+  @include nest-to(textarea, select, input) {
+    color: red;
+  }
 }
 
 textarea {
   @include nest('.control') {  // textarea .control
+    color: red;
+  }
+
+  // group
+  @include nest('.control', '.control1') {
     color: red;
   }
 }

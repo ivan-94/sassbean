@@ -1,3 +1,5 @@
+/// TODO support group
+
 
 /// like selector-append
 /// @example
@@ -6,8 +8,8 @@
 ///       max-width: 100%;
 ///     }
 ///   }
-@mixin append-to($selector) {
-  @at-root #{$selector}#{&} {
+@mixin append-to($selector...) {
+  @include -high-order-selector($selector, selector-append, 1, append-to) {
     @content;
   }
 }
@@ -19,20 +21,52 @@
 ///       max-width: 100%;
 ///     }
 ///   }
-@mixin append($selector) {
-  @at-root #{&}#{$selector} {
+@mixin append($selector...) {
+  @include -high-order-selector($selector, selector-append, 2, append) {
     @content;
   }
 }
 
-@mixin nest-to($selector) {
-  @at-root #{$selector} #{&} {
+@mixin nest-to($selector...) {
+  @include -high-order-selector($selector, selector-nest, 1, nest-to) {
     @content;
   }
 }
 
-@mixin nest($selector) {
-  @at-root #{&} #{$selector} {
+@mixin nest($selector...) {
+  @include -high-order-selector($selector, selector-nest, 2, nest) {
     @content;
   }
+}
+
+@mixin -high-order-selector($selector, $function-name, $order, $mixin-name) {
+  @if & != null {
+    $selectors: -combine-selectors($selector, &, $function-name, $order);
+    @at-root #{$selectors} {
+      @content;
+    }
+  }
+  @else {
+    @warn "#{$mixin-name} error: `&` is null";
+  }
+}
+
+/// @access private
+/// @param {List} $selectors - selector group
+/// @param {Selector} $parent - `&`
+/// @param {Number} $order - 1: function-name(selector, &)
+///                          0: function-name(&, selector)
+/// @param {String} $function-name - function name to call
+@function -combine-selectors($selectors, $parent, $function-name, $order: 1) {
+  $combined-selectors: ();
+  @each $selector in $selectors {
+    $combined-selectors: append($combined-selectors,
+      if($order == 1,
+        call($function-name, $selector, $parent),
+        call($function-name, $parent, $selector)
+      ),
+      comma
+    );
+  }
+  @return selector-parse($combined-selectors);
 }
