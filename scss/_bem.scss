@@ -21,6 +21,9 @@ $theme-namespace-prefix: 't' !default;
 /// @type {String}
 $element-separator: '__' !default;
 
+/// isolate element from block, element will not join to block with '__'
+$element-isolate: false !default;
+
 /// define modifier separator
 /// @type {String}
 $modifier-separator: '--' !default;
@@ -58,16 +61,26 @@ $-block: null;    //store current block
 ///   }
 $-element: null;  //store current element
 
+/// indicate current modifier context
+/// @access private
+/// @type {Map}
+///   {
+///     modifiers: {List},
+///     is-group: {Boolean}
+///   }
+$-modifier: null;
+
+
 /// indicate current scope
 /// @access private
 /// @type {selector}
 $-scope: null;   //store current &
 
-/// indicate current level, block or element
+/// indicate current level, block ,element or modifier
 $-current-level: null;
 /// indicate current theme, theme will inject into current scope
 $-theme: null;
-$-nested-modifiers: ();
+// $-nested-modifiers: ();
 
 /// scope, do nothing, just semantization
 /// @param {Selector} $selector - selector
@@ -174,31 +187,34 @@ $-nested-modifiers: ();
 /// @alias state
 /// @param {String} $modifier... - one or more modifier
 @mixin modifier($modifiers...) {
-  $selector: null;
-  $old-nested-modifiers: $-nested-modifiers;
+  $-prev-level: $-current-level;
+  $-current-level: modifier !global;
 
-  @if $-current-level != block and $-current-level != element {
+  $selector: null;
+  // $old-nested-modifiers: $-nested-modifiers;
+
+  @if $-prev-level != block and $-prev-level != element {
     @error 'Modifier error: modifier should be called within block or element: (#{inspect($modifiers)})';
   }
-  // modifiers group. nonsupport nested-modifiers
-  @if length($modifiers) > 1 {
-    $selector: -build-modifier-group-class($modifiers);
-  }
-  // support for nested modifiers
-  @else {
-    $modifier: nth($modifiers, 1);
-    @if not prefixless($modifier) {
-      @error 'Modifier error: Invalid modifier: #{inspect($modifier)}';
-    }
-    $-nested-modifiers: append($-nested-modifiers, $modifier) !global;
-    $selector: -build-nested-modifiers-class();
+
+  $-modifier: (
+    modifiers: $modifiers,
+    is-group: length($modifiers) > 1,
+  ) !global;
+
+  // modifiers group.
+  @if length($modifiers) >= 1 {
+    $selector: -build-modifier-group-class($-prev-level, $modifiers);
   }
 
   @at-root #{$selector} {
     @content;
   }
+
   //restore
-  $-nested-modifiers: $old-nested-modifiers !global;
+  $-modifier: null !global;
+  // $-nested-modifiers: $old-nested-modifiers !global;
+  $-current-level: $-prev-level !global;  //restore level
 }
 
 
@@ -215,13 +231,31 @@ $-nested-modifiers: ();
 ///   }
 /// @param {String} $block-states... - block state or modifier
 @mixin shadow($block-states...) {
+  @include -shadow(selector-nest, $block-states...) {
+    @content;
+  }
+}
+
+@mixin shadow-child($block-states...) {
+  @include -shadow(selector-child, $block-states...) {
+    @content;
+  }
+}
+
+@mixin shadow-sibling($block-states...) {
+  @include -shadow(selector-sibling, $block-states...) {
+    @content;
+  }
+}
+
+@mixin -shadow($join-function, $block-states...) {
   @if $-element == null {
     @error 'Shadow error: shadow should be called within element.';
   }
 
   $block: bem-block($-block);
   $elements: to-list(-get-element-class($block, $-element));
-  $selector: -build-shadow-class($block, $elements, $block-states);
+  $selector: -build-shadow-class($join-function, $block, $elements, $block-states);
 
   @at-root #{$selector} {
     @content;
@@ -229,9 +263,11 @@ $-nested-modifiers: ();
 }
 
 
+
 /// act like modifier
 /// see breakpoint
 /// @param {String} $breakpoint - breakpoint name defined in $breakpoints
+/// @param {Boolean} [false] $without-media - without @media
 /// @example
 ///   @include block(block) {
 ///     @include at(large) {                              @media screen and (#{large}) { .block\@large {} }
@@ -245,36 +281,42 @@ $-nested-modifiers: ();
 ///     @include element(A, B, C) {
 ///        @include at(larget) {...}                      @media screen and (#{large}) {.block__A\@large, .block__B\@large, .block__C\@large{...} }
 ///     }
+///     @include at(small, $without-media: true) {...}   .block\@small
 ///   }
-@mixin at($breakpoint) {
+@mixin at($breakpoint, $without-media: false) {
   $selector:null;
-  @if $-current-level != block and $-current-level != element {
+  @if $-current-level != block and $-current-level != element  and $-current-level != modifier {
     @error 'Responsive suffix error: responsive suffix(at) should be called within block or element: (at#{(inspect($breakpoint))})';
   }
   @if not breakpoint-exists($breakpoint) {
     @error 'Breakpoint error: breakpoint(`#{$breakpoint}`) non-exists. Available breakpoints: #{inspect(map-keys($breakpoints))}';
   }
 
+  //block
   @if $-current-level == block {
     $selector: bem-block-at($-block,$breakpoint);
   }
+  @else if $combined-style-modifier and $-current-level == modifier {
+    @error 'Responsive suffix error: responsive suffix(at) non support combined-style-modifier.';
+  }
   @else {
-    @if -is-element-group($-element) {
-      $elements: -get-element($-element, true);
-      $selectors: ();
-      @each $ele in $elements {
-        $selectors: append($selectors, bem-element-at($-block, $ele, $breakpoint), comma);
-      }
-      $selector: selector-parse($selectors);
-    } @else {
-      $selector: bem-element-at($-block, -get-element($-element), $breakpoint);
+    $selectors: ();
+    @each $sel in & {
+      $selectors: append($selectors, bem-block-at($sel, $breakpoint), comma);
     }
+    $selector: selector-parse($selectors);
   }
 
   // media
-  @include breakpoint($breakpoint) {
+  @if $without-media {
     @at-root #{$selector} {
       @content;
+    }
+  } @else {
+    @include breakpoint($breakpoint) {
+      @at-root #{$selector} {
+        @content;
+      }
     }
   }
 }
@@ -328,7 +370,7 @@ $-nested-modifiers: ();
   @debug '<scope:         #{$-scope}>';
   @debug '<block:         #{$-block}>';
   @debug '<element:       #{inspect($-element)}>';
-  @debug '<modifier:      #{inspect($-nested-modifiers)}>';
+  // @debug '<modifier:      #{inspect($-nested-modifiers)}>';
   @debug '--';
 }
 
@@ -338,7 +380,12 @@ $-nested-modifiers: ();
 /// @param {String} $element - element name
 /// @param {String} $modifiers... - one or more modifier
 @function bem-element($block,$element, $modifiers...) {
-  @return bem-block($block + $element-separator + $element, $modifiers...);
+  @if $element-isolate {
+    @return bem-block($element, $modifiers...);
+  }
+  @else {
+    @return bem-block($block + $element-separator + $element, $modifiers...);
+  }
 }
 
 /// generate block class name
@@ -385,6 +432,7 @@ $-nested-modifiers: ();
   @return #{bem-element($block, $element)}#{$responsive-suffix}#{$breakpoint};
 }
 
+
 /// return whether a string has prefix.
 /// @access public
 /// @param {String} $value
@@ -394,6 +442,9 @@ $-nested-modifiers: ();
 ///   prefixless(':a') => false
 $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
 @function prefixless($value) {
+  @if is-number($value) {
+    @return true;
+  }
   @if not is-string($value) {
     @return false;
   }
@@ -469,14 +520,14 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
 }
 
 /// @access private
-@function -get-modified-object($current-level, $block, $element-desc) {
+@function -get-modified-object($context, $block, $element-desc) {
   $modified-object: null;
   // block modifiers
-  @if $current-level == block {
+  @if $context == block {
     $modified-object: bem-block($block);
   }
   // element modifiers and not inner element group context
-  @else if $current-level == element and not -is-element-group($element-desc) {
+  @else if $context == element and not -is-element-group($element-desc) {
     $element: -get-element($element-desc);
     $modified-object: bem-element($block, $element);
   }
@@ -487,8 +538,8 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return $modified-object;
 }
 
-@function -build-modifier-group-class($modifiers) {
-  $modified-object: -get-modified-object($-current-level, $-block, $-element);
+@function -build-modifier-group-class($context, $modifiers) {
+  $modified-object: -get-modified-object($context, $-block, $-element);
 
   $selectors: ();
   @each $modifier in $modifiers {
@@ -512,15 +563,15 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return selector-parse($selectors);
 }
 
-@function -build-nested-modifiers-class() {
-  $modifiers: $-nested-modifiers;
-  $modified-object: -get-modified-object($-current-level, $-block, $-element);
-  $selector: bem-block($modified-object, $modifiers...);
-  @return if($-scope != null,
-    selector-nest($-scope, $selector),
-    $selector
-    );
-}
+// @function -build-nested-modifiers-class($context) {
+//   $modifiers: $-nested-modifiers;
+//   $modified-object: -get-modified-object($context, $-block, $-element);
+//   $selector: bem-block($modified-object, $modifiers...);
+//   @return if($-scope != null,
+//     selector-nest($-scope, $selector),
+//     $selector
+//     );
+// }
 
 @function -get-shadow-parent($block, $shadow) {
   $selector: null;
@@ -539,7 +590,7 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return $selector;
 }
 
-@function -build-shadow-class($block, $elements, $values) {
+@function -build-shadow-class($join-function, $block, $elements, $values) {
   $selectors: ();
   $parents: ();
   @each $val in $values {
@@ -548,7 +599,7 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
 
   @each $parent in $parents {
     @each $element in $elements {
-      $selectors: append($selectors, selector-nest($parent, $element), comma);
+      $selectors: append($selectors, call($join-function, $parent, $element), comma);
     }
   }
   @return selector-parse($selectors);

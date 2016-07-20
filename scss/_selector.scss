@@ -39,6 +39,19 @@
   }
 }
 
+@mixin child-of($selector...) {
+  @include -high-order-selector($selector, selector-child, 1, child-of) {
+    @content;
+  }
+}
+
+@mixin child($selector...) {
+  @include -high-order-selector($selector, selector-child, 2, child) {
+    @content;
+  }
+}
+
+
 @mixin -high-order-selector($selector, $function-name, $order, $mixin-name) {
   @if & != null {
     $selectors: -combine-selectors($selector, &, $function-name, $order);
@@ -49,6 +62,14 @@
   @else {
     @warn "#{$mixin-name} error: `&` is null";
   }
+}
+
+@function selector-child($selectors...) {
+  @return selector-parse(list-join($selectors, ' > '));
+}
+
+@function selector-sibling($selectors...) {
+  @return selector-parse(list-join($selectors, ' + '));
 }
 
 /// @access private

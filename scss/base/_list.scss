@@ -17,11 +17,7 @@
   $l: length($list);
   @while $l >= $i {
     $item: nth($list, $i);
-    @if is-string($item) {
-      $rt: $rt + $separator + $item;
-    } @else {
-      @warn "item: #{$item} not a string";
-    }
+    $rt: #{$rt}#{$separator}#{$item};
     $i: $i + 1;
   }
   @return $rt;

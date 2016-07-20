@@ -40,3 +40,21 @@ textarea {
     color: red;
   }
 }
+
+.control {
+  @include child-of(textarea) {
+    color: red;
+  }
+  @include child-of(textarea, select) {
+    color: red;
+  }
+}
+
+.control {
+  @include child(textarea) {
+    color: red;
+  }
+  @include child(textarea, select) {
+    color: red;
+  }
+}

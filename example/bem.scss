@@ -57,6 +57,10 @@
       color: red;
     }
 
+    @include modifier(1) {
+      color: red;
+    }
+
     // default modifier
     @include modifier(&, A, B) {        // .a .block, .a .block--A, .a .block--B
       color: red;
@@ -71,33 +75,11 @@
       color: red;
     }
 
-    @include modifier(A) {
-      /* nested modifiers */
-      @include modifier(B) {              //.a .block--A--B
-        color: red;
-      }
-      @include modifier(C) {             //.a .block--A--B--C
-        color: red;
-        @include modifier(D) {           //.a .block--A--B--C--D
-          @include bem-debug;
-          color: red;
-        }
-      }
-    }
-
     /* element modifiers */
     @include element(element) {
       @include modifier(one, two) {     // .a .block__element--one, .a .block__element--two
         /* element modifier group */
         color: red;
-      }
-      @include modifier(A) {
-        /* nested modifiers */
-        @include modifier(B) {
-          @include modifier(C) {
-            color: red;                 // .a .block__element--A--B--C
-          }
-        }
       }
     }
   }
@@ -115,11 +97,11 @@ $combined-style-modifier: true;       // enable combined style
     color: red;
   }
   // nested modifiers
-  @include modifier(D) {
-    @include modifier(E) {           //.block-combined-style.--D.--E
-      color: red;
-    }
-  }
+  // @include modifier(D) {
+  //   @include modifier(E) {           //.block-combined-style.--D.--E
+  //     color: red;
+  //   }
+  // }
 
   // element modifier
   @include  element(element) {
@@ -141,7 +123,7 @@ $combined-style-modifier: false;
       color: red;
     }
   }
-  
+
   /* shadow in element group */
   @include element(C, D) {               // .A__C, .A__D
     color: red;
@@ -151,6 +133,18 @@ $combined-style-modifier: false;
 
     @include shadow(':focus', modifier) {  //.A:focus .A__C, .A:focus .A__D, .A--modifier .A__C, .A--modifier .A__D {
       color: blue;
+    }
+  }
+
+  /*  shadow child */
+  @include element(E) {
+    color: red;
+    @include shadow-child(active) {    //.A--active > .A__E
+      color: red;
+    }
+    //shadow sibling
+    @include shadow-sibling(active) {  //.A--active + .A__E
+      color: red;
     }
   }
 }
@@ -188,6 +182,18 @@ $enable-namespace: true;
   @include element(C, D, E) {
     width: 100px;
     @include at(large) {
+      width: 100px;
+    }
+  }
+
+  // modifier responsive-suffix
+  @include modifier(C) {
+    @include at(small) {
+      width: 100px;
+    }
+  }
+  @include modifier(C, D) {
+    @include at(small) {
       width: 100px;
     }
   }
@@ -231,3 +237,16 @@ $enable-namespace: true;
     }
   }
 }
+
+//isolate element
+$element-isolate: true;
+@include block(block) {       //.block
+  color: red;
+  @include element(element) {  //.element
+    color: red;
+    @include shadow(A) {       //.block--A .element
+      color: red;
+    }
+  }
+}
+$element-isolate: false;

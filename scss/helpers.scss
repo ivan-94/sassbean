@@ -1,6 +1,7 @@
 @import "unit";
 @import "base";
 @import "quantity-queries";
+@import 'selector';
 @import "bem";
 @import "shortcuts";
 @import "centering";
@@ -12,5 +13,4 @@
 @import "classes";
 @import "color-management";
 @import 'variable-share';
-@import 'selector';
 @import "graphs";

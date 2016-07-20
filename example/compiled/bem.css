@@ -51,6 +51,10 @@
   color: red;
 }
 
+.a .block--1 {
+  color: red;
+}
+
 .a .block, .a .block--A, .a .block--B {
   color: red;
 }
@@ -63,32 +67,8 @@
   color: red;
 }
 
-.a .block--A {
-  /* nested modifiers */
-}
-
-.a .block--A--B {
-  color: red;
-}
-
-.a .block--A--C {
-  color: red;
-}
-
-.a .block--A--C--D {
-  color: red;
-}
-
 .a .block__element--one, .a .block__element--two {
   /* element modifier group */
-  color: red;
-}
-
-.a .block__element--A {
-  /* nested modifiers */
-}
-
-.a .block__element--A--B--C {
   color: red;
 }
 
@@ -101,10 +81,6 @@
   color: red;
 }
 
-.block-combined-style.--D.--E {
-  color: red;
-}
-
 .block-combined-style__element.--A {
   color: red;
 }
@@ -112,6 +88,7 @@
 /* test shadow */
 .A {
   /* shadow in element group */
+  /*  shadow child */
 }
 
 .A__B {
@@ -136,6 +113,18 @@
 
 .A:focus .A__C, .A:focus .A__D, .A--modifier .A__C, .A--modifier .A__D {
   color: blue;
+}
+
+.A__E {
+  color: red;
+}
+
+.A--active > .A__E {
+  color: red;
+}
+
+.A--active + .A__E {
+  color: red;
 }
 
 /* test namescpace */
@@ -174,6 +163,14 @@
   }
 }
 
+.B--C\@small {
+  width: 100px;
+}
+
+.B--C\@small, .B--D\@small {
+  width: 100px;
+}
+
 /* test theme */
 .t-light .block {
   color: red;
@@ -208,5 +205,17 @@
 }
 
 .t-light .block__element--modifier {
+  color: red;
+}
+
+.block {
+  color: red;
+}
+
+.element {
+  color: red;
+}
+
+.block--A .element {
   color: red;
 }

@@ -1,6 +1,9 @@
 ////
 /// @group base
 ////
+@function to-string($value) {
+  @return #{$value};
+}
 
 @function serialize($value) {
   $result: ();

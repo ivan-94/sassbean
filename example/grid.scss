@@ -1,3 +1,4 @@
 @import "../scss/helpers";
 
-@include generate-classes();
+// @include generate-classes();
+@include generate-bem-grid-classes;

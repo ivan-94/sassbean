@@ -11,6 +11,6 @@
     @include generate-centering-classes;
 
     @if $generate-grid {
-      @include g-generate-classes;
+      @include generate-bem-grid-classes;
     }
 }
