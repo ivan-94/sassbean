@@ -82,6 +82,18 @@
         color: red;
       }
     }
+
+    @include element(element1, element2) {
+      @include modifier(one) {          // .a .block__element1--one, .a .block__element2--one
+        /* element group modifiers */
+        color: red;
+      }
+
+      @include modifier(two, three) {  // .a .block__element1--two, .a .block__element2--two, .a .block__element1--three, a. .block__element2--three
+        /* element group & modifiers group*/
+        color: red;
+      }
+    }
   }
 }
 
@@ -96,6 +108,7 @@ $combined-style-modifier: true;       // enable combined style
   @include modifier(B, C) {          //.block-combined-style.--B, .block-combined-style.--C
     color: red;
   }
+
   // nested modifiers
   // @include modifier(D) {
   //   @include modifier(E) {           //.block-combined-style.--D.--E
@@ -106,6 +119,18 @@ $combined-style-modifier: true;       // enable combined style
   // element modifier
   @include  element(element) {
     @include modifier(A) {          //.block-combined-style__element.--A
+      color: red;
+    }
+  }
+
+  @include element(element1, element2) {
+    @include modifier(one) {          // .a .block__element1.--one, .a .block__element2.--one
+      /* element group modifiers */
+      color: red;
+    }
+
+    @include modifier(two, three) {  // .a .block__element1.--two, .a .block__element2.--two, .a .block__element1.--three, a. .block__element2.--three
+      /* element group & modifiers group*/
       color: red;
     }
   }

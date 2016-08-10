@@ -534,20 +534,25 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     $modified-object: bem-block($block);
   }
   // element modifiers and not inner element group context
-  @else if $context == element and not -is-element-group($element-desc) {
-    $element: -get-element($element-desc);
-    $modified-object: bem-element($block, $element);
+  @else if $context == element {
+    @if -is-element-group($element-desc) {
+      $elements: -get-element($element-desc, $list: true);
+      $modified-object: ();
+
+      @each $element in $elements {
+        $modified-object: append($modified-object, bem-element($block, $element), comma);
+      }
+
+    } @else {
+      $element: -get-element($element-desc);
+      $modified-object: bem-element($block, $element);
+    }
   }
-  // invalid modified object
-  @else {
-    @error 'Modifier error: modifier should not called within `element group(#{inspect(map-get($element-desc, elements))}`.';
-  }
+
   @return $modified-object;
 }
 
-@function -build-modifier-group-class($context, $modifiers) {
-  $modified-object: -get-modified-object($context, $-block, $-element);
-
+@function -build-modifier($modifiers, $modified-object) {
   $selectors: ();
   @each $modifier in $modifiers {
     $selector: null;
@@ -567,6 +572,26 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     }
     $selectors: append($selectors, $selector, comma);
   }
+
+  @return $selectors;
+}
+
+@function -build-modifier-group-class($context, $modifiers) {
+  $modified-object: -get-modified-object($context, $-block, $-element);
+  $selectors: ();
+
+  @if is-list($modified-object) {
+    @each $object in $modified-object {
+      $selectors: append($selectors, -build-modifier($modifiers, $object), comma);
+    }
+    @debug $selectors;
+    @debug selector-parse($selectors);
+  }
+  @else {
+    $selectors: -build-modifier($modifiers, $modified-object);
+  }
+
+
   @return selector-parse($selectors);
 }
 

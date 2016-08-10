@@ -72,6 +72,16 @@
   color: red;
 }
 
+.a .block__element1--one, .a .block__element2--one {
+  /* element group modifiers */
+  color: red;
+}
+
+.a .block__element1--two, .a .block__element1--three, .a .block__element2--two, .a .block__element2--three {
+  /* element group & modifiers group*/
+  color: red;
+}
+
 /* test combine style modifier */
 .block-combined-style.--A {
   color: red;
@@ -82,6 +92,16 @@
 }
 
 .block-combined-style__element.--A {
+  color: red;
+}
+
+.block-combined-style__element1.--one, .block-combined-style__element2.--one {
+  /* element group modifiers */
+  color: red;
+}
+
+.block-combined-style__element1.--two, .block-combined-style__element1.--three, .block-combined-style__element2.--two, .block-combined-style__element2.--three {
+  /* element group & modifiers group*/
   color: red;
 }
 
