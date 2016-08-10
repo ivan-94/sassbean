@@ -13,6 +13,7 @@
 }
 
 .row .row {
+  max-width: none;
   margin-left: -0.625rem;
   margin-right: -0.625rem;
 }
@@ -22,6 +23,15 @@
     margin-left: -0.9375rem;
     margin-right: -0.9375rem;
   }
+}
+
+.row--expanded {
+  max-width: none;
+}
+
+.row--expanded > .row {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .col {

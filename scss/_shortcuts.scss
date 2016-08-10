@@ -50,6 +50,11 @@
   top: 0;
 }
 
+@mixin hover {
+  &:hover {
+    @content;
+  }
+}
 
 @mixin hover-focus {
  &:hover,
@@ -86,7 +91,7 @@
 
 @mixin border-left-radius($radius) {
   border-top-left-radius: $radius;
-  border-bottom-right-radius: $radius;
+  border-bottom-left-radius: $radius;
 }
 
 @mixin border-right-radius($radius) {

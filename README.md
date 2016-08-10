@@ -1,9 +1,9 @@
-# sass-helpers
+# sassbean
 sass helpful mixins and functions 
 
 ## Install 
 ```
-npm i sass-helpers
+npm i sassbean
 ```
 
 ## Import
@@ -14,7 +14,7 @@ npm i sass-helpers
   
   gulp.task('sass',function (){
     gulp.src('./sass/**/*.scss')
-    .pipe(sass({includePaths: path.dirname(require.resolve('sass-helpers'))}))
+    .pipe(sass({includePaths: path.dirname(require.resolve('sassbean'))}))
     .pipe(gulp.dest('./css'))
   })
 ```

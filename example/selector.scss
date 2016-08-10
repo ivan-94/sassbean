@@ -1,4 +1,4 @@
-@import "../scss/helpers";
+@import "../scss/bean";
 
 .control {
   @include append-to(textarea) { // textarea.control

@@ -24,6 +24,14 @@
       @include g-row($options: (nest unclearfix));
     }
 
+    @include modifier(expanded) {
+      max-width: none;
+      @include child(bem-block(row)) {
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+
     // column
     @include element(col) {
       @include g-col;

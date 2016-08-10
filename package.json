@@ -1,8 +1,8 @@
 {
-  "name": "sass-helpers",
-  "version": "1.3.0",
+  "name": "sassbean",
+  "version": "0.0.2",
   "description": "sass helpful mixins and functions",
-  "main": "scss/helpers.scss",
+  "main": "scss/bean.scss",
   "directories": {
     "test": "test"
   },

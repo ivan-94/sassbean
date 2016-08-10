@@ -114,7 +114,7 @@
 
   $build-selector: -build-selector($selector-append,$last-selector,$sibling);
 
-  @at-root #{build-selector} {
+  @at-root #{$build-selector} {
     @content;
   }
 }
