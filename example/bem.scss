@@ -135,9 +135,30 @@ $combined-style-modifier: true;       // enable combined style
     }
   }
 }
+$combined-style-modifier: false;
+
+/* test modifiers element */
+.scope {
+  @include block (A) {
+    // modifier group
+    @include modifier(M, M1) {
+      @include element(E) {    // .scope .A--M .A__E, .scope .A--M1 .A__E {
+        color: red;
+      }
+    }
+
+    // element group
+    @include modifier(MM) {
+      @include element(E1, E2) { //.scope .A--MM .A__E1, .scope .A--MM .A__E2
+        color: red;
+      }
+    }
+  }
+}
+
+
 
 /* test shadow */
-$combined-style-modifier: false;
 @include block(A) {
   @include element(B) {
     color: red;

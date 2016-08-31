@@ -105,6 +105,15 @@
   color: red;
 }
 
+/* test modifiers element */
+.scope .A--M .A__E, .scope .A--M1 .A__E {
+  color: red;
+}
+
+.scope .A--MM .A__E1, .scope .A--MM .A__E2 {
+  color: red;
+}
+
 /* test shadow */
 .A {
   /* shadow in element group */

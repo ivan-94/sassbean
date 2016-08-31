@@ -173,8 +173,20 @@ $-theme: null;
     is-group: length($elements) > 1
     ) !global;
 
-  @at-root #{-build-element-class($-block, $elements)} {
-    @content;
+  // block element
+  @if $-prev-level == block {
+    @at-root #{-build-element-class($-block, $elements)} {
+      @content;
+    }
+  }
+  // block modifier element
+  @else if $-prev-level == modifier {
+     @at-root #{-build-element-class-within-modifier($-block, $elements)} {
+       @content;
+     }
+  }
+  @else {
+    @error 'Element nested: element(#{inspect($elements)}) should not be called with another element(`#{inspect($-element)}`)!';
   }
 
   $-element: null !global;                //reset
@@ -497,6 +509,20 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return selector-parse($selectors);
 }
 
+
+/// build elements class nest to block modifier
+@function -build-element-class-within-modifier($block, $elements) {
+  $selectors: ();
+  @each $selector in & {
+    @each $element in $elements {
+      $nested: selector-nest($selector, bem-element($block, $element));
+      $selectors: append($selectors, $nested, comma);
+    }
+  }
+
+  @return selector-parse($selectors);
+}
+
 /// get first elements in element-desc
 /// @access private
 @function -get-element($element-desc, $list: false) {
@@ -584,8 +610,6 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
     @each $object in $modified-object {
       $selectors: append($selectors, -build-modifier($modifiers, $object), comma);
     }
-    @debug $selectors;
-    @debug selector-parse($selectors);
   }
   @else {
     $selectors: -build-modifier($modifiers, $modified-object);
