@@ -193,6 +193,13 @@ $combined-style-modifier: false;
       color: red;
     }
   }
+
+  /* shadow and */
+  @include element(E) {
+    @include shadow-and(M1, M2) {     //.A--M1.A--M2 .A__E {
+      color: red;
+    }
+  }
 }
 
 /* test namescpace */

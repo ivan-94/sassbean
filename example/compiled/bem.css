@@ -118,6 +118,7 @@
 .A {
   /* shadow in element group */
   /*  shadow child */
+  /* shadow and */
 }
 
 .A__B {
@@ -153,6 +154,10 @@
 }
 
 .A--active + .A__E {
+  color: red;
+}
+
+.A--M1.A--M2 .A__E {
   color: red;
 }
 

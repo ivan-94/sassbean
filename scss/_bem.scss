@@ -244,31 +244,75 @@ $-theme: null;
 ///   }
 /// @param {String} $block-states... - block state or modifier
 @mixin shadow($block-states...) {
-  @include -shadow(selector-nest, $block-states...) {
+  @include -shadow(selector-nest, false, $block-states...) {
     @content;
   }
 }
 
+/// @example
+///   @include block(b) {
+///     @include element(a) {
+///       @include shadow-child(c) {                    //=> .b--c > .b__a
+///         color: red;
+///       }
+///     }
+///   }
+///
 @mixin shadow-child($block-states...) {
-  @include -shadow(selector-child, $block-states...) {
+  @include -shadow(selector-child, false, $block-states...) {
     @content;
   }
 }
 
+/// @example
+///   @include block(b) {
+///     @include element(a) {
+///       @include shadow-sibling(c) {                    //=> .b--c + .b__a
+///         color: red;
+///       }
+///     }
+///   }
+///
 @mixin shadow-sibling($block-states...) {
-  @include -shadow(selector-sibling, $block-states...) {
+  @include -shadow(selector-sibling, false, $block-states...) {
     @content;
   }
 }
 
-@mixin -shadow($join-function, $block-states...) {
+/// @example
+///   @include block(B) {
+///      @include element(E) {
+///         @include shadow-and(M1, M1) {}  //=> .B--M1.B--M2 .B__E
+///      }
+///   }
+///
+@mixin shadow-and($block-states...) {
+  @include -shadow(selector-nest, true, $block-states...) {
+    @content;
+  }
+}
+
+
+@mixin shadow-and-child($block-states...) {
+  @include -shadow(selector-child, true, $block-states...) {
+    @content;
+  }
+}
+
+@mixin shadow-and-sibling($block-states...) {
+  @include -shadow(selector-sibling, true, $block-states...) {
+    @content;
+  }
+}
+
+@mixin -shadow($join-function, $isAnd, $block-states...) {
   @if $-element == null {
     @error 'Shadow error: shadow should be called within element.';
   }
 
   $block: bem-block($-block);
   $elements: to-list(-get-element-class($block, $-element));
-  $selector: -build-shadow-class($join-function, $block, $elements, $block-states);
+  $selector: -build-shadow-class($join-function, $block, $elements, $block-states, $isAnd);
 
   @at-root #{$selector} {
     @content;
@@ -646,18 +690,27 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return $selector;
 }
 
-@function -build-shadow-class($join-function, $block, $elements, $values) {
+@function -build-shadow-class($join-function, $block, $elements, $values, $isAnd) {
   $selectors: ();
   $parents: ();
   @each $val in $values {
     $parents: append($parents, -get-shadow-parent($block, $val), comma);
   }
 
-  @each $parent in $parents {
+  @if $isAnd {
+    $parent: selector-append($parents...);
     @each $element in $elements {
       $selectors: append($selectors, call($join-function, $parent, $element), comma);
     }
   }
+  @else {
+    @each $parent in $parents {
+      @each $element in $elements {
+        $selectors: append($selectors, call($join-function, $parent, $element), comma);
+      }
+    }
+  }
+
   @return selector-parse($selectors);
 }
 
