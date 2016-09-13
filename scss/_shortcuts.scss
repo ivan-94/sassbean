@@ -79,7 +79,7 @@
   }
 }
 
-@include plain-hover-focus-active {
+@mixin plain-hover-focus-active {
   &,
   &:hover,
   &:focus,

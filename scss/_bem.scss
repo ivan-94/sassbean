@@ -138,6 +138,13 @@ $-theme: null;
   $-current-level: $-prev-level !global;
 }
 
+/// get-current block class
+/// @return {string}
+@function get-block() {
+  @return prefixer($-block);
+}
+
+
 
 /// Block Element
 /// @access public
@@ -191,6 +198,12 @@ $-theme: null;
 
   $-element: null !global;                //reset
   $-current-level: $-prev-level !global;  //restore level
+}
+
+/// get current elements
+/// @return {String|List}
+@function get-element() {
+  @return -get-element-class();
 }
 
 
