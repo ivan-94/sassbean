@@ -18,7 +18,7 @@
 /// resizable block
 /// @param {String} $direction - resize option: horizontal,vertical,both
 @mixin resizable($direction) {
-  resize: $direction; 
+  resize: $direction;
   overflow: auto;
 }
 
@@ -74,6 +74,15 @@
 @mixin hover-focus-active {
   &:focus,
   &:hover,
+  &:active {
+    @content;
+  }
+}
+
+@include plain-hover-focus-active {
+  &,
+  &:hover,
+  &:focus,
   &:active {
     @content;
   }

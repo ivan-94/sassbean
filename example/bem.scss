@@ -6,7 +6,6 @@
   color: red;
   @include element(element) {          //.block__element{}
     color: blue;
-    @include bem-debug;
     /*
     @include element(nested-element) { //Error here: don't nest element into element
       color: blue;
@@ -22,7 +21,6 @@
   @include element(element1, element2) { // .block__element1, .block__element2 {}
     /* element group */
     color: red;
-    @include bem-debug;
   }
 }
 
@@ -32,7 +30,6 @@
     color: red;
     @include element(element) {          // .a .block2__element
       color: red;
-      @include bem-debug;
     }
   }
 }
@@ -97,6 +94,15 @@
   }
 }
 
+/* test modifiers and */
+.scope {
+  @include block(block) {
+    @include modifier-and(M1, M2) { //.scope .block--M1.block--M2
+      color: red;
+    }
+  }
+}
+
 /* test combine style modifier */
 $combined-style-modifier: true;       // enable combined style
 @include block(block-combined-style) {
@@ -104,8 +110,18 @@ $combined-style-modifier: true;       // enable combined style
   @include modifier(A) {              //.block-combined-style.--A
     color: red;
   }
+
+  @include modifier(&, '[disabled]', '[selected]', C) {  // .block-combined-style[disabled], .block-combined-style[selected], .block-combined-style.--C {
+    color: red;
+  }
+
   //modifier group
   @include modifier(B, C) {          //.block-combined-style.--B, .block-combined-style.--C
+    color: red;
+  }
+
+  //modifier and
+  @include modifier-and(B, C) {     //.block-combined-style.--B.--C
     color: red;
   }
 
@@ -121,6 +137,11 @@ $combined-style-modifier: true;       // enable combined style
     @include modifier(A) {          //.block-combined-style__element.--A
       color: red;
     }
+
+    //element modifier and
+    @include modifier-and(A, B) {   //.block-combined-style__element.--A.--B
+      color: red;
+    }
   }
 
   @include element(element1, element2) {
@@ -129,7 +150,12 @@ $combined-style-modifier: true;       // enable combined style
       color: red;
     }
 
-    @include modifier(two, three) {  // .a .block__element1.--two, .a .block__element2.--two, .a .block__element1.--three, a. .block__element2.--three
+    // modifier and
+    @include modifier-and(A, B) {     //.block-combined-style__element1.--A.--B, .block-combined-style__element2.--A.--B
+      color: red;
+    }
+
+    @include modifier(two, three) {   //.block-combined-style__element1.--two, .block-combined-style__element1.--three, .block-combined-style__element2.--two, .block-combined-style__element2.--three {
       /* element group & modifiers group*/
       color: red;
     }

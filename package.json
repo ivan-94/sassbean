@@ -1,6 +1,6 @@
 {
   "name": "sassbean",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "sass helpful mixins and functions",
   "main": "scss/bean.scss",
   "directories": {

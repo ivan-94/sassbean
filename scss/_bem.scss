@@ -199,7 +199,35 @@ $-theme: null;
 /// @alias m
 /// @alias state
 /// @param {String} $modifier... - one or more modifier
+/// @example
+///   @include block(B) {
+///     @include modifier(M1, M2) {    //.B--M1, B--M2
+///     }
+///     @include element(E) {
+///       @include modifier(M1, M2) {  //.B__E--M1, B__E--M2
+///     }
+///   }
 @mixin modifier($modifiers...) {
+  @include -modifier(false, $modifiers...) {
+    @content;
+  }
+}
+
+/// Block Modifier and
+/// @access public
+/// @param {String} $modifier... - one or more modifier
+/// @example
+///   @include block(B) {
+///     @include modifier-and(M1, M2) {    //.B--M1.B--M2
+///     }
+///   }
+@mixin modifier-and($modifiers...) {
+  @include -modifier(true, $modifiers...) {
+    @content;
+  }
+}
+
+@mixin -modifier($and: false, $modifiers... ) {
   $-prev-level: $-current-level;
   $-current-level: modifier !global;
 
@@ -217,7 +245,7 @@ $-theme: null;
 
   // modifiers group.
   @if length($modifiers) >= 1 {
-    $selector: -build-modifier-group-class($-prev-level, $modifiers);
+    $selector: -build-modifier-group-class($-prev-level, $modifiers, $and);
   }
 
   @at-root #{$selector} {
@@ -622,8 +650,11 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
   @return $modified-object;
 }
 
-@function -build-modifier($modifiers, $modified-object) {
+@function -build-modifier($modifiers, $modified-object, $and) {
   $selectors: ();
+  // append function
+  $append-function: if($combined-style-modifier, selector-unify, selector-append);
+
   @each $modifier in $modifiers {
     $selector: null;
     @if $modifier == & {
@@ -637,26 +668,34 @@ $-no-parse-prefixs: ('.' '#' ':' '*' '[' '>' '+');
       $selector: bem-block($modified-object, $modifier);
     }
 
-    @if $-scope != null {
-      $selector: selector-nest($-scope, $selector);
+    @if $and {
+      $selectors: if(is-empty($selectors), $selector, call($append-function, $selectors, $selector));
+    } @else {
+      @if $-scope != null {
+        $selector: selector-nest($-scope, $selector);
+      }
+      $selectors: append($selectors, $selector, comma);
     }
-    $selectors: append($selectors, $selector, comma);
+  }
+
+  @if $and and $-scope != null {
+    $selectors: selector-nest($-scope, $selectors);
   }
 
   @return $selectors;
 }
 
-@function -build-modifier-group-class($context, $modifiers) {
+@function -build-modifier-group-class($context, $modifiers, $and) {
   $modified-object: -get-modified-object($context, $-block, $-element);
   $selectors: ();
 
   @if is-list($modified-object) {
     @each $object in $modified-object {
-      $selectors: append($selectors, -build-modifier($modifiers, $object), comma);
+      $selectors: append($selectors, -build-modifier($modifiers, $object, $and), comma);
     }
   }
   @else {
-    $selectors: -build-modifier($modifiers, $modified-object);
+    $selectors: -build-modifier($modifiers, $modified-object, $and);
   }
 
 

@@ -82,8 +82,17 @@
   color: red;
 }
 
+/* test modifiers and */
+.scope .block--M1.block--M2 {
+  color: red;
+}
+
 /* test combine style modifier */
 .block-combined-style.--A {
+  color: red;
+}
+
+.block-combined-style, .block-combined-style[disabled], .block-combined-style[selected], .block-combined-style.--C {
   color: red;
 }
 
@@ -91,12 +100,24 @@
   color: red;
 }
 
+.block-combined-style.--B.--C {
+  color: red;
+}
+
 .block-combined-style__element.--A {
+  color: red;
+}
+
+.block-combined-style__element.--A.--B {
   color: red;
 }
 
 .block-combined-style__element1.--one, .block-combined-style__element2.--one {
   /* element group modifiers */
+  color: red;
+}
+
+.block-combined-style__element1.--A.--B, .block-combined-style__element2.--A.--B {
   color: red;
 }
 
