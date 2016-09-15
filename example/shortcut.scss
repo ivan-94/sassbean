@@ -1,0 +1,31 @@
+@import "../scss/bean";
+
+.test {
+  @include hover {                        //.test:hover {
+    color: red;
+  }
+
+  @include hover(is-checked) {            //.test:hover, .test.is-checked {
+    color: red;
+  }
+
+  @include hover-focus {                  //.test:hover, .test:focus {
+    color: red;
+  }
+
+  @include plain-hover-focus {            //.test, .test:hover, .test:focus {
+    color: red;
+  }
+
+  @include hover-focus-active {           //.test:hover, .test:focus, .test:active {
+    color: red;
+  }
+
+  @include plain-hover-focus-active {     //.test, .test:hover, .test:focus, .test:active {
+    color: red;
+  }
+
+  @include state(&, is-active, ':hover') { // .test, .test.is-active, .test:hover {
+    color: red;
+  }
+}

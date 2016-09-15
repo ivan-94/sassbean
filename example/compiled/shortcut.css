@@ -1,0 +1,27 @@
+.test:hover {
+  color: red;
+}
+
+.test:hover, .test.is-checked {
+  color: red;
+}
+
+.test:hover, .test:focus {
+  color: red;
+}
+
+.test, .test:hover, .test:focus {
+  color: red;
+}
+
+.test:hover, .test:focus, .test:active {
+  color: red;
+}
+
+.test, .test:hover, .test:focus, .test:active {
+  color: red;
+}
+
+.test, .test.is-active, .test:hover {
+  color: red;
+}

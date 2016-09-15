@@ -50,40 +50,64 @@
   top: 0;
 }
 
-@mixin hover {
-  &:hover {
+@mixin state($modifiers...) {
+  @include -state(null, $modifiers) {
     @content;
   }
 }
 
-@mixin hover-focus {
- &:hover,
- &:focus {
-   @content;
- }
-}
+@mixin hover($modifiers...) {
+  $selectors: ('#{&}:hover',);
 
-@mixin plain-hover-focus {
-  &,
-  &:hover,
-  &:focus {
+  @include -state($selectors, $modifiers) {
     @content;
   }
 }
 
-@mixin hover-focus-active {
-  &:focus,
-  &:hover,
-  &:active {
+@mixin hover-focus($modifiers...) {
+  $selectors: ('#{&}:hover', '#{&}:focus');
+  @include -state($selectors, $modifiers) {
     @content;
   }
 }
 
-@mixin plain-hover-focus-active {
-  &,
-  &:hover,
-  &:focus,
-  &:active {
+@mixin plain-hover-focus($modifiers...) {
+  $selectors: (&, '#{&}:hover', '#{&}:focus');
+  @include -state($selectors, $modifiers) {
+    @content;
+  }
+}
+
+@mixin hover-focus-active($modifiers...) {
+  $selectors: ('#{&}:hover', '#{&}:focus', '#{&}:active');
+  @include -state($selectors, $modifiers) {
+    @content;
+  }
+}
+
+@mixin plain-hover-focus-active($modifiers...) {
+  $selectors: (&, '#{&}:hover', '#{&}:focus', '#{&}:active');
+  @include -state($selectors, $modifiers) {
+    @content;
+  }
+}
+
+@mixin -state($init, $modifiers) {
+  $selectors: if(is-list($init), $init, ());
+
+  @each $modifier in $modifiers {
+    @if $modifier != null {
+      $selector: ();
+      @if $modifier == & {
+        $selector: &;
+      } @else {
+        $selector: selector-append(&, prefixer($modifier));
+      }
+      $selectors: append($selectors, $selector, comma);
+    }
+  }
+
+  @at-root #{$selectors} {
     @content;
   }
 }
@@ -95,7 +119,7 @@
 
 @mixin border-bottom-radius($radius) {
   border-bottom-left-radius: $radius;
-  border-bottom-left-radius: $radius;
+  border-bottom-right-radius: $radius;
 }
 
 @mixin border-left-radius($radius) {
@@ -107,6 +131,3 @@
   border-top-right-radius: $radius;
   border-bottom-right-radius: $radius;
 }
-
-
-@function text-inputs(){}
