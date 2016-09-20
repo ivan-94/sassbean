@@ -4,14 +4,14 @@
 /* test block */
 @include block(block) {                //.block{}
   color: red;
-  @include element(element) {          //.block__element{}
+  @include element(element) {          // .block__element{}
     color: blue;
-    /*
-    @include element(nested-element) { //Error here: don't nest element into element
+    // nested element
+    @include element(nested-element) { // .block__element .block__nested-element {
       color: blue;
     }
-    */
   }
+
   /*
   @include block(another-block) {      //Error here: can not nest block into block
     color: red;
@@ -30,6 +30,11 @@
     color: red;
     @include element(element) {          // .a .block2__element
       color: red;
+
+      //nested element
+      @include element(nested-element) {  //.a .block2__element .block2__nested-element {
+        color: red;
+      }
     }
   }
 }
@@ -170,6 +175,10 @@ $combined-style-modifier: false;
     @include modifier(M, M1) {
       @include element(E) {    // .scope .A--M .A__E, .scope .A--M1 .A__E {
         color: red;
+        //nested element
+        @include element(D, F) { //.scope .A--M .A__E .A__D, .scope .A--M .A__E .A__F, .scope .A--M1 .A__E .A__D, .scope .A--M1 .A__E .A__F 
+          color: red;
+        }
       }
     }
 

@@ -10,11 +10,10 @@
 
 .block__element {
   color: blue;
-  /*
-    @include element(nested-element) { //Error here: don't nest element into element
-      color: blue;
-    }
-    */
+}
+
+.block__element .block__nested-element {
+  color: blue;
 }
 
 .block__element1, .block__element2 {
@@ -28,6 +27,10 @@
 }
 
 .a .block2__element {
+  color: red;
+}
+
+.a .block2__element .block2__nested-element {
   color: red;
 }
 
@@ -128,6 +131,10 @@
 
 /* test modifiers element */
 .scope .A--M .A__E, .scope .A--M1 .A__E {
+  color: red;
+}
+
+.scope .A--M .A__E .A__D, .scope .A--M .A__E .A__F, .scope .A--M1 .A__E .A__D, .scope .A--M1 .A__E .A__F {
   color: red;
 }
 

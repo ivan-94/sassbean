@@ -165,13 +165,10 @@ $-theme: null;
 @mixin element($elements...) {
   $-prev-level: $-current-level;
   $-current-level: element !global;
+  $-prev-element: $-element;
 
   @if $-block == null {
     @error 'Block not found: `#{inspect($elements)}` element should be called within block )! ';
-  }
-
-  @if $-element != null {
-    @error 'Element nested: element(#{inspect($elements)}) should not be called with another element(`#{inspect($-element)}`)!';
   }
 
   //save element context
@@ -186,17 +183,17 @@ $-theme: null;
       @content;
     }
   }
-  // block modifier element
-  @else if $-prev-level == modifier {
-     @at-root #{-build-element-class-within-modifier($-block, $elements)} {
-       @content;
-     }
+  // nested element selector
+  @else if $-prev-level == element or $-prev-level == modifier {
+   @at-root #{-build-element-class-within-modifier($-block, $elements)} {
+      @content;
+    }
   }
-  @else {
-    @error 'Element nested: element(#{inspect($elements)}) should not be called with another element(`#{inspect($-element)}`)!';
-  }
+  // @else {
+  //   @error 'Element nested: element(#{inspect($elements)}) should not be called with another element(`#{inspect($-element)}`)!';
+  // }
 
-  $-element: null !global;                //reset
+  $-element: $-prev-element !global;      //reset
   $-current-level: $-prev-level !global;  //restore level
 }
 
@@ -550,6 +547,9 @@ $-theme: null;
 
 
 /// build elements class nest to block modifier
+/// @access private
+/// @param {String} $block - block name
+/// @param {List}  $elements - elements
 @function -build-element-class-within-modifier($block, $elements) {
   $selectors: ();
   @each $selector in & {
