@@ -3,14 +3,8 @@
 ///
 
 /// generate helper css class
-@mixin generate-classes (
-  $generate-grid:true
-  ) {
-    @include generate-util-classes;
-    @include generate-type-classes;
-    @include generate-centering-classes;
-
-    @if $generate-grid {
-      @include generate-bem-grid-classes;
-    }
+@mixin generate-classes () {
+  @include generate-util-classes;
+  @include generate-type-classes;
+  @include generate-centering-classes;
 }
